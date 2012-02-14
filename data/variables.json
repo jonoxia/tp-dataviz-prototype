@@ -1,57 +1,58 @@
-{
-  "num_users": {
-    "name": "Number of Users",
-    "datatype": "count",
-    "description": "What total number of users was in this category?",
-    "url": ""
-  },
-
-  "pct_users": {
-    "name": "Percentage of Users",
-    "datatype": "fraction",
-    "description": "What percentage of users were in this category?",
-    "url": ""
-  },
-
-  "num_domains": {
-    "name": "Number of Domains Visited",
-    "datatype": "count",
-    "description": "How many distinct domains did the user open from the new tab?",
-    "url": ""
-  },
-
-  "ui_type": {
-    "name": "UI Variant",
-    "datatype": "enumerated",
-    "description": "Which of the six new tab interface designs did the user have?",
-    "url": ""
-  },
-
-  "num_loads": {
-    "name": "Number of Page Loads",
-    "datatype": "count",
-    "description": "How many pages did the user load from the new tab?",
-    "url": ""
-  },
-
-  "load_method": {
-    "name": "Page Load Method",
-    "datatype": "enumerated",
-    "description": "Did the user load pages from the new tab using the mouse or keyboard?",
-    "url": ""
-  },
-
-  "load_delay": {
-    "name": "Load Delay",
-    "datatype": "time",
-    "description": "How many seconds passed between the user opening the new tab and loading a page?",
-    "url": ""
-  },
-
-  "time_on_site": {
-    "name": "Time Spent on Site",
-    "datatype": "time",
-    "description": "After the user loaded a page, how long did they spend there?",
-    "url": ""
+[
+  {
+    "datatype": "fraction", 
+    "url": "", 
+    "id": "pct_users", 
+    "name": "Percentage of Users", 
+    "description": "What percentage of users were in this category?"
+  }, 
+  {
+    "datatype": "enumerated", 
+    "url": "", 
+    "id": "ui_type", 
+    "name": "UI Variant", 
+    "description": "Which of the six new tab interface designs did the user have?"
+  }, 
+  {
+    "datatype": "count", 
+    "url": "", 
+    "id": "num_domains", 
+    "name": "Number of Domains Visited", 
+    "description": "How many distinct domains did the user open from the new tab?"
+  }, 
+  {
+    "datatype": "time", 
+    "url": "", 
+    "id": "time_on_site", 
+    "name": "Time Spent on Site", 
+    "description": "After the user loaded a page, how long did they spend there?"
+  }, 
+  {
+    "datatype": "count", 
+    "url": "", 
+    "id": "num_users", 
+    "name": "Number of Users", 
+    "description": "What total number of users was in this category?"
+  }, 
+  {
+    "datatype": "count", 
+    "url": "", 
+    "id": "num_loads", 
+    "name": "Number of Page Loads", 
+    "description": "How many pages did the user load from the new tab?"
+  }, 
+  {
+    "datatype": "time", 
+    "url": "", 
+    "id": "load_delay", 
+    "name": "Load Delay", 
+    "description": "How many seconds passed between the user opening the new tab and loading a page?"
+  }, 
+  {
+    "datatype": "enumerated", 
+    "url": "", 
+    "id": "load_method", 
+    "name": "Page Load Method", 
+    "description": "Did the user load pages from the new tab using the mouse or keyboard?"
   }
-}
+]
