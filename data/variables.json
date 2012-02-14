@@ -1,0 +1,57 @@
+{
+  "num_users": {
+    "name": "Number of Users",
+    "datatype": "count",
+    "description": "What total number of users was in this category?",
+    "url": ""
+  },
+
+  "pct_users": {
+    "name": "Percentage of Users",
+    "datatype": "fraction",
+    "description": "What percentage of users were in this category?",
+    "url": ""
+  },
+
+  "num_domains": {
+    "name": "Number of Domains Visited",
+    "datatype": "count",
+    "description": "How many distinct domains did the user open from the new tab?",
+    "url": ""
+  },
+
+  "ui_type": {
+    "name": "UI Variant",
+    "datatype": "enumerated",
+    "description": "Which of the six new tab interface designs did the user have?",
+    "url": ""
+  },
+
+  "num_loads": {
+    "name": "Number of Page Loads",
+    "datatype": "count",
+    "description": "How many pages did the user load from the new tab?",
+    "url": ""
+  },
+
+  "load_method": {
+    "name": "Page Load Method",
+    "datatype": "enumerated",
+    "description": "Did the user load pages from the new tab using the mouse or keyboard?",
+    "url": ""
+  },
+
+  "load_delay": {
+    "name": "Load Delay",
+    "datatype": "time",
+    "description": "How many seconds passed between the user opening the new tab and loading a page?",
+    "url": ""
+  },
+
+  "time_on_site": {
+    "name": "Time Spent on Site",
+    "datatype": "time",
+    "description": "After the user loaded a page, how long did they spend there?",
+    "url": ""
+  }
+}
