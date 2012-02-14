@@ -36,11 +36,21 @@
   <header>
 
   </header>
+    <div class="dragtarget" id="x-axis-target">X-axis</div>
+    <div class="dragtarget" id="y-axis-target">Y-axis</div>
+    <div class="dragtarget" id="color-target">Color</div>
+    <div class="dragtarget" id="lattice-x-target">Lattice X</div>
+    <div class="dragtarget" id="lattice-y-target">Lattice Y</div>
+
+    <span id="output"></span>
+
+    <hr/>
+
   <div role="main">
-    here is some text
     
     <ul id="variables_menu" />
-    
+
+
   </div>
   <footer>
 
@@ -52,6 +62,7 @@
   <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+  <script src="js/libs/jquery-ui-1.8.17.custom.min.js"></script>
 
   <!-- scripts concatenated and minified via build script -->
   <script src="js/plugins.js"></script>
@@ -69,7 +80,7 @@
   
   
   <script>
-    $(function() {
+    $(document).ready(function() {
         makeattrmenu();
     });
     
@@ -85,13 +96,12 @@
                $('<li></li>').addClass([val.datatype].join(' ')).html(val.name)   
             );
           });
+         initDragGui();
         })
     };
     
     
     </script>
-    
-    <script>$("p").text("<b>Some</b> new text.");</script>
-
+    <script src="js/dragui.js"></script>
 </body>
 </html>

@@ -1,14 +1,11 @@
 
 function initDragGui(){
   var items = $("#variables_menu").find("li");
-  items.draggable();
+  items.draggable({revert: "valid"});
 
-  /*$( "#droppable" ).droppable({
+  $( ".dragtarget" ).droppable({
     drop: function( event, ui ) {
-      $( this )
-	.addClass( "ui-state-highlight" )
-        .find( "p" )
-	.html( "Dropped!" );
+      $("#output").html("You dropped " + ui.draggable.html() + " onto " + $(this).attr("id"));
     }
-  });*/
+  });
 }
