@@ -34,6 +34,9 @@
        chromium.org/developers/how-tos/chrome-frame-getting-started -->
   <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
   <header>
+<h1>Preferences Study</h1>
+
+<p>data about user preferences, collected in fall 2011</p>
 
   </header>
     <div class="dragtarget" id="x-axis-target">X-axis</div>
@@ -47,13 +50,26 @@
     <hr/>
 
   <div role="main">
+<<<<<<< HEAD
     
     <ul id="variables_menu" />
 
 
   </div>
   <footer>
+=======
+>>>>>>> merge
 
+      <div style="float:right; width: 400" id='imagearea'>
+      <img src="img/directlabel-011.png" />
+      </div>
+
+    <ul id="variables_menu"></ul>
+
+  </div> <!-- end of main -->
+
+  <footer>
+  <p>did this satisfy your needs?   <a href="yes">yes</a> <a href="no">no</a></p>
   </footer>
 
 
@@ -78,7 +94,6 @@
     s.parentNode.insertBefore(g,s)}(document,'script'));
   </script>
   
-  
   <script>
     $(document).ready(function() {
         makeattrmenu();
@@ -91,7 +106,6 @@
           var menu = $("#variables_menu");
           menu.empty();
           $.each(data, function(key, val) {
-            console.log("ha!");
             menu.append(
                $('<li></li>').addClass([val.datatype].join(' ')).html(val.name)   
             );
@@ -99,9 +113,10 @@
          initDragGui();
         })
     };
-    
-    
+
+
     </script>
     <script src="js/dragui.js"></script>
+
 </body>
 </html>
