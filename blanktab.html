@@ -93,8 +93,6 @@
     
     function makeattrmenu() {
         $.getJSON("data/variables.json", function(data) {
-          console.log(JSON.stringify(data));          
-          var items=[];
           var menu = $("#variables_menu");
           menu.empty();
           $.each(data, function(key, val) {
@@ -105,7 +103,7 @@
             });
             menu.append(newItem);
           });
-         initDragGui();
+         initDragGui(data);
         });
     };
 
