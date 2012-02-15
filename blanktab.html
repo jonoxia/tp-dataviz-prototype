@@ -98,12 +98,15 @@
           var menu = $("#variables_menu");
           menu.empty();
           $.each(data, function(key, val) {
-            menu.append(
-               $('<li></li>').addClass([val.datatype].join(' ')).html(val.name).attr("id", "var_" + val.id)
-            );
+            var newItem = $('<li></li>');
+            newItem.addClass([val.datatype].join(' ')).html(val.name).attr("id", "var_" + val.id);
+            newItem.on("mouseover", function() {
+              $("#output").html(val.description);
+            });
+            menu.append(newItem);
           });
          initDragGui();
-        })
+        });
     };
 
 
