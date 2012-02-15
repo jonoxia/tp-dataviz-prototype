@@ -20,7 +20,9 @@
 
   <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
 
-  <link rel="stylesheet" href="css/style.css">
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 
   <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
 
@@ -33,32 +35,68 @@
   <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
        chromium.org/developers/how-tos/chrome-frame-getting-started -->
   <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
-  <header>
-<h1>Preferences Study</h1>
-
-<p>data about user preferences, collected in fall 2011</p>
-
-  </header>
 
 
-  <div role="main">
-    <div class="dragtarget" id="x-axis-target">X-axis <span class="valbox"></div></div>
-    <div class="dragtarget" id="y-axis-target">Y-axis <span class="valbox"></div></div>
-    <div class="dragtarget" id="color-target">Color <span class="valbox"></div></div>
-    <div class="dragtarget" id="lattice-x-target">Lattice X <span class="valbox"></div></div>
-    <div class="dragtarget" id="lattice-y-target">Lattice Y <span class="valbox"></div></div>
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
 
-    <span id="output"></span>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
 
-    <hr/>
-    
-      <div style="float:right; width: 400" id="imagearea">
-      <img src="img/directlabel-011.png" />
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Blank Tabs Study</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Chart Builder</a></li>
+              <li><a href="#about">Help</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+            <p class="navbar-text pull-right">Logged in as <a href="#">UX</a></p>
+          </div><!--/.nav-collapse -->
+        </div>
       </div>
+    </div>
 
-    <ul id="variables_menu"></ul>
 
-  </div> <!-- end of main -->
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list" id="variables_menu">
+              <li class="nav-header" >ingredients</li>
+              <!-- <li class="active"><a href="#">Link</a></li>-->
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+
+        <div class="span9">
+          <div class="hero-unit">
+            <h1></h1>
+            <div id="imagearea">
+            <p><img src="img/directlabel-011.png" /></p>
+            </div>
+            <p><a class="btn btn-primary btn-large">share</a></p>
+          </div><!--/row-->
+        </div><!--/span-->
+    </div><!--/row-->
+
+    <div>
+        <div class="dragtarget" id="x-axis-target">X-axis</div>
+        <div class="dragtarget" id="y-axis-target">Y-axis</div>
+        <div class="dragtarget" id="color-target">Color</div>
+        <div class="dragtarget" id="lattice-x-target">Lattice X</div>
+        <div class="dragtarget" id="lattice-y-target">Lattice Y</div>
+
+        <span id="output"></span>
+    </div>
 
   <footer>
   <p>did this satisfy your needs?   <a href="yes">yes</a> <a href="no">no</a></p>
@@ -96,7 +134,7 @@
           console.log(JSON.stringify(data));          
           var items=[];
           var menu = $("#variables_menu");
-          menu.empty();
+          //menu.empty();
           $.each(data, function(key, val) {
             var newItem = $('<li></li>');
             newItem.addClass([val.datatype].join(' ')).html(val.name).attr("id", "var_" + val.id);
@@ -111,6 +149,7 @@
 
 
     </script>
+    <script src="js/bootstrap.js"></script>
     <script src="js/dragui.js"></script>
 
 </body>
