@@ -1,0 +1,74 @@
+[
+  {
+    "datatype": "fraction", 
+    "semantics": "user",
+    "url": "", 
+    "id": "pct_users", 
+    "name": "Percentage of Users", 
+    "description": "What percentage of users were in this category?"
+  },
+  {
+    "datatype": "integer",
+    "semantics": "user",
+    "url": "", 
+    "id": "num_users", 
+    "name": "Number of Users", 
+    "description": "What total number of users was in this category?"
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_event",
+    "url": "", 
+    "id": "item", 
+    "name": "UI item", 
+    "description": "Name of the toolbar button or menu item used."
+  },
+  {
+    "datatype": "timestamp",
+    "semantics": "per_event",
+    "url": "",
+    "id": "timestamp", 
+    "name": "Time", 
+    "description": "Time when the UI item was used."
+  },
+  {
+    "datatype": "integer",
+    "semantics": "event",
+    "url": "", 
+    "id": "num_actions", 
+    "name": "Number of Actions", 
+    "description": "Number of times UI item was used."
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "os", 
+    "name": "Operating System", 
+    "description": "Was the user on Windows, Mac, or Linux?"
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "fx_version", 
+    "name": "Firefox Version", 
+    "description": "What version of Firefox was the user running?"
+  },
+  {
+    "datatype": "integer",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "number_extensions", 
+    "name": "Number of Extensions", 
+    "description": "How many extensions did this user have?"
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "location", 
+    "name": "Locale", 
+    "description": "What was the user's Firefox locale setting?"
+  }
+]

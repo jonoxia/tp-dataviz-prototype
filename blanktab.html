@@ -23,6 +23,7 @@
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/charts.css">
 
   <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
 
@@ -112,6 +113,7 @@
   <script src="js/libs/jquery-ui-1.8.17.custom.min.js"></script>
 
   <!-- scripts concatenated and minified via build script -->
+  <!-- TODO I don't really understand how Boilerplate wants us to include scripts -->
   <script src="js/plugins.js"></script>
   <script src="js/script.js"></script>
   <!-- end scripts -->
@@ -131,7 +133,7 @@
     });
     
     function makeattrmenu() {
-        $.getJSON("data/variables.json", function(data) {
+        $.getJSON("data/beta_ui-variables.json", function(data) {
           var menu = $("#variables_menu");
           //menu.empty();
           $.each(data, function(key, val) {
@@ -150,6 +152,8 @@
     </script>
     <script src="js/bootstrap.js"></script>
     <script src="js/dragui.js"></script>
-
+    <script src="js/libs/d3.js"></script>
+    <script src="js/libs/d3.geom.js"></script>
+    <script src="js/libs/d3.layout.js"></script>
 </body>
 </html>

@@ -1,5 +1,4 @@
 
-
 function updateFragment(params) {
   var baseLoc = ("" + window.location).split("#")[0];
   var args = [];
@@ -23,6 +22,72 @@ function updateFragment(params) {
 //  to determine axes for all
  */
 
+
+
+function scatterplot(xAxis, yAxis, dotType) {
+  var dots;
+  // If x and y variables are both user/per user, dots in scatterplot are users.
+  // If at least one axis is event-level, though, dots have to be events.
+
+  // (Unless... if one axis is a continuous event-level variable, we could pick the average
+  // (or min or max) per user and use that value to plot a user-dot. How to represent that
+  // option?)
+  // (I guess a dropdown would appear: Dots represent
+  //     --> events (all users lumped together)
+  //     --> users (average value per user)
+
+  if (xAxis.datatype == "factor" && yAxis.datatype == "factor") {
+    $("#output").html("Make a grid of factor vs. factor, plot users/events in each one");
+  } else if (xAxis.datatype == "factor") {
+    $("#output").html("Factor on the x axis,continous on the y axis, scatter points");
+    $("#the-graph-image").attr("src", "img/density-bars.png");
+  } else if (yAxis.datatype == "factor") {
+    $("#output").html("Continuous on the  x axis, factor on the y axis, scatter points");
+    $("#the-graph-image").attr("src", "img/horiz-density-bars.png");
+  } else {
+    $("#output").html("Continuous scatter on both axes.");
+    $("#the-graph-image").attr("src", "img/scatter.png");
+  }
+
+}
+
+function barplot(xAxis, yAxis) {
+  // TODO get the data.json once when page is loaded instead of getting it here.
+  d3.json("data/beta_ui-data.json", function(userData) {
+
+    // Test using case where xaxis is "user" and yaxis is "per user, factor"
+    // There will be others
+
+    var factorValueCounts = {};
+    for (var i = 0; i < userData.length; i++) {
+      var val = userData[i][ yAxis.id ];
+      if (factorValueCounts[val]) {
+        factorValueCounts[val] += 1;
+      } else {
+        factorValueCounts[val] = 1;
+      }
+    }
+
+    var dataForD3 = [];
+    for (var val in factorValueCounts) {
+      dataForD3.push({label: val, count: factorValueCounts[val]});
+    }
+
+    // Create horiz. bar chart with d3.js
+    $("#imagearea").empty();
+    var chart = d3.select("#imagearea").attr("class", "chart");
+
+    chart.selectAll("div")
+      .data(dataForD3)
+    .enter().append("div")
+      .style("width", function(d) { return d.count * 10 + "px"; })
+      .text(function(d) { return d.label; });
+
+  });
+}
+
+
+
 function initDragGui(data){
 
   function getVarById(varId) {
@@ -35,13 +100,8 @@ function initDragGui(data){
   }
 
   function drawNewGraph(params) {
-
-    $("#output").html("Drawing graph with " + JSON.stringify(params));
-
     var xVar = getVarById(params["x-axis"]);
     var yVar = getVarById(params["y-axis"]);
-    $("#output").html("xVar semantics " + xVar.semantics + ", yvar semantics = " + yVar.semantics);
-
 
     if (params["color"] && (params["lattice-x"] || params["lattice-y"])) {
       $("#the-graph-image").attr("src", "img/compare-new.png");
@@ -70,7 +130,7 @@ function initDragGui(data){
       case "per_user":
         if (yVar.datatype == "factor") {
           $("#output").html("horizontal bar chart, num users in each per-user factor");
-          $("#the-graph-image").attr("src", "img/horiz-bars.png");
+          barplot(xVar, yVar);
         } else {
           $("#output").html("horizontal histogram using arbitrary buckets for continuous variable on y");
           $("#the-graph-image").attr("src", "img/horiz-histogram.png");
@@ -154,15 +214,11 @@ function initDragGui(data){
       switch (yVar.semantics) {
       case "user":
         $("#output").html(" TODO THIS IS THE HARD ONE!!");
+        // need to aggregate the per-event variable for each user -- e.g.
+        // producing the 'average event value' per user and plotting that.
         break;
       case "per_user":
-        if (yVar.datatype == "factor") {
-          $("#output").html(" User-level factor is groups on y-axis, each event is a dot, scatter-density bars");
-          $("#the-graph-image").attr("src", "img/horiz-density-bars.png");
-        } else {
-          $("#output").html(" Scatter plot, each dot is an event");
-          $("#the-graph-image").attr("src", "img/scatter.png");
-        }
+        scatterplot(xVar, yVar, "event"); // scatterplot, each dot is event
         break;
       case "event":
         if (xVar.datatype == "factor") {
@@ -175,8 +231,7 @@ function initDragGui(data){
 
         break;
       case "per_event":
-        $("#output").html(" Scatter plot, each dot is an event");
-        $("#the-graph-image").attr("src", "img/scatter.png");
+        scatterplot(xVar, yVar, "event"); // scatterplot, each dot is event
         break;
       }
       break;
