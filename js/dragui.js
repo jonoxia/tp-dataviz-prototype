@@ -51,49 +51,79 @@ function scatterplot(xAxis, yAxis, dotType) {
 
 }
 
-function barplot(xAxis, yAxis) {
-  // TODO get the data.json once when page is loaded instead of getting it here.
-  d3.json("data/beta_ui-data.json", function(userData) {
-
+function barplot(userData, options) {
     // Test using case where xaxis is "user" and yaxis is "per user, factor"
     // There will be others
 
-    var factorValueCounts = {};
-    for (var i = 0; i < userData.length; i++) {
-      var val = userData[i][ yAxis.id ];
-      if (factorValueCounts[val]) {
-        factorValueCounts[val] += 1;
-      } else {
-        factorValueCounts[val] = 1;
+  // options:
+   // {factors: yVar.id, count: "events", bars: "horizontal",factorPerEvent: true}
+
+  var factorId = options.factors;
+
+  var factorValueCounts = {};
+  function addCount(val) {
+    if (factorValueCounts[val]) {
+      factorValueCounts[val] += 1;
+    } else {
+      factorValueCounts[val] = 1;
+    }
+  }
+
+  for (var i = 0; i < userData.length; i++) {
+    var val;
+    if (!options.factorPerEvent) {   // expect factorId to match a field on the user
+      val = userData[i][ factorId ];
+    }
+    if (options.count == "users") { // count users with each value of the factor
+      addCount(val);
+    } else if (options.count == "events") { // count events
+      for (var j = 0; j < userData[i].events.length; j++) {
+        if (options.factorPerEvent) {
+          val = userData[i].events[j][ factorId ]; // expect factorId to match field on event
+        }
+        addCount(val);
       }
     }
+  }
 
-    var dataForD3 = [];
-    for (var val in factorValueCounts) {
-      dataForD3.push({label: val, count: factorValueCounts[val]});
-    }
+  var dataForD3 = [];
+  var labelsForD3 = [];
+  for (var val in factorValueCounts) {
+    labelsForD3.push(val);
+    dataForD3.push(factorValueCounts[val]);
+  }
+  // TODO sort dataForD3 into an order that we like - make sort-order a drop-down or something
+  // most -> least, least -> most, or alphabetical by factor?
 
-    // Create horiz. bar chart with d3.js
-    $("#imagearea").empty();
-    var chart = d3.select("#imagearea").attr("class", "chart");
+
+  // Create horiz. bar chart with d3.js
+  var chart = d3.select("#imagearea").attr("class", "chart");
+
+  // TODO scaling!!!!
+  if (options.bars == "horizontal") {
+
+    var x = d3.scale.linear()
+      .domain([0, d3.max(dataForD3)])
+      .range(["0px", chart.style("width")]);
 
     chart.selectAll("div")
       .data(dataForD3)
     .enter().append("div")
-      .style("width", function(d) { return d.count * 10 + "px"; })
-      .text(function(d) { return d.label; });
-
-  });
+      .style("width", x)
+      .text(function(d, i) { return labelsForD3[i]; });
+  } else if (options.bars == "vertical") {
+    // TODO
+  }
 }
 
 
 
-function initDragGui(data){
+function initDragGui(variables, userData){
 
   function getVarById(varId) {
-    for(var x = 0; x < data.length; x++) {
-      if (data[x].id == varId) {
-        return data[x];
+    for(var x = 0; x < variables.length; x++) {
+      if (variables[x].id == varId) {
+        return variables[x];
       }
     }
     return null;
@@ -130,7 +160,7 @@ function initDragGui(data){
       case "per_user":
         if (yVar.datatype == "factor") {
           $("#output").html("horizontal bar chart, num users in each per-user factor");
-          barplot(xVar, yVar);
+          barplot(userData, {factors: yVar.id, count: "users", bars: "horizontal"});
         } else {
           $("#output").html("horizontal histogram using arbitrary buckets for continuous variable on y");
           $("#the-graph-image").attr("src", "img/horiz-histogram.png");
@@ -150,7 +180,7 @@ function initDragGui(data){
         case "user":
         if (xVar.datatype == "factor") {
           $("#output").html(" vertical bar chart, num users in each per-user factor");
-          $("#the-graph-image").attr("src", "img/vert-bars.png");
+          barplot(userData, {factors: xVar.id, count: "users", bars: "vertical"});
         } else {
           $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
           $("#the-graph-image").attr("src", "img/histogram.png");
@@ -163,7 +193,7 @@ function initDragGui(data){
       case "event":
         if (xVar.datatype == "factor") {
           $("#output").html(" Bar chart - x-axis is the user-level factors, y-axis is number of events");
-          $("#the-graph-image").attr("src", "img/vert-bars.png");
+          barplot(userData, {factors: xVar.id, count: "events", bars: "vertical"});
         } else {
           $("#output").html(" Histogram - bucket continuous variable, y-axis is number of events");
           $("#the-graph-image").attr("src", "img/histogram.png");
@@ -189,7 +219,7 @@ function initDragGui(data){
       case "per_user":
         if (yVar.datatype == "factor") {
           $("#output").html(" Bar chart - y-axis is the user-level factors, x-axis is number of events");
-          $("#the-graph-image").attr("src", "img/horiz-bars.png");
+          barplot(userData, {factors: yVar.id, count: "events", bars: "horizontal"});
         } else {
           $("#output").html(" Histogram - bucket continuous variable, x-axis is number of events");
           $("#the-graph-image").attr("src", "img/horiz-histogram.png");
@@ -201,7 +231,8 @@ function initDragGui(data){
       case "per_event":
         if (yVar.datatype == "factor") {
           $("#output").html(" horizontal bar chart, num events in each per-event factor group");
-          $("#the-graph-image").attr("src", "img/horiz-bars.png");
+          barplot(userData, {factors: yVar.id, count: "events", bars: "horizontal",
+                             factorPerEvent: true});
         } else {
           $("#output").html(" horizontal histogram using arbitrary buckets for continuous variable on y");
           $("#the-graph-image").attr("src", "img/horiz-histogram.png");
@@ -223,7 +254,8 @@ function initDragGui(data){
       case "event":
         if (xVar.datatype == "factor") {
           $("#output").html(" vertical bar chart, num events in each per-event factor group");
-          $("#the-graph-image").attr("src", "img/vert-bars.png");
+          barplot(userData, {factors: xVar.id, count: "events", bars: "vertical",
+                             factorPerEvent: true});
         } else {
           $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
           $("#the-graph-image").attr("src", "img/histogram.png");
@@ -321,6 +353,7 @@ function initDragGui(data){
 
       // Draw a graph if at least x-axis and y-axis have been set.
       if (params["x-axis"] && params["y-axis"]) {
+        $("#imagearea").empty(); // Clear out old graph, if any
         drawNewGraph(params);
       }
     }
@@ -329,3 +362,4 @@ function initDragGui(data){
 
 // TODO should be able to drag a variable from its placement after it has been placed.
 // Dragging it out should clear that field. Dragging it to another occupied field should swap.
+// Other
