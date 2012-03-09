@@ -95,43 +95,60 @@ function barplot(userData, options) {
   // TODO sort dataForD3 into an order that we like - make sort-order a drop-down or something
   // most -> least, least -> most, or alphabetical by factor?
 
-  var width = parseInt(d3.select("#imagearea").style("width").replace("px", ""));
-  var barHeight = 20;
+  var containerWidth = parseInt(d3.select("#imagearea").style("width").replace("px", ""));
+  var containerHeight = 600; // or somethin?
+  var leftMargin = 50;
+  var bottomMargin = 50; // or something?
+  var chartWidth = containerWidth - leftMargin;
+  var chartHeight = containerHeight - bottomMargin;
+  var horizBars = (options.bars == "horizontal");
 
-  var chart = d3.select("#imagearea").append("svg:svg")
+  var container = d3.select("#imagearea").append("svg:svg")
+    .attr("width", containerWidth)
+    .attr("height", containerHeight);
+
+  // Flip the y-axis so 0,0 is at the bottom left and increasing y goes up
+  var chart = container.append("svg:g")
     .attr("class", "chart")
-    .attr("width", width)
-    .attr("height", barHeight * dataForD3.length);
+    .attr("transform", "translate(" + leftMargin + "," + (chartHeight) + ")scale(1,-1)");
+  // um one problem... this flips all my text upside-down!!
 
-  if (options.bars == "horizontal") {
+  var barLength = d3.scale.linear()
+    .domain([0, d3.max(dataForD3)])
+    .range([0, (horizBars? chartWidth : chartHeight)]);
 
-    // Create horiz. bar chart with d3.js
-    var x = d3.scale.linear()
-      .domain([0, d3.max(dataForD3)])
-      .range([0, width]);
+  var barWidth = (horizBars? chartHeight : chartWidth) / dataForD3.length;
+  // could use d3.scale.ordinal() for this but it's trivial to calculate it
 
-    chart.selectAll("rect")
-      .data(dataForD3)
-    .enter().append("svg:rect")
-      .attr("y", function(d, i) {return i * barHeight; })
-      .attr("width", x)
-      .attr("height", barHeight);
+  chart.selectAll("rect")
+    .data(dataForD3)
+  .enter().append("svg:rect")
+    .attr((horizBars? "y": "x"), function(d, i) { return i * barWidth; })
+    .attr((horizBars? "width": "height"), barLength)
+    .attr((horizBars? "height": "width"), barWidth);
 
+  // Text goes outside the chart so as not to be upside-down
+  var texties = container.selectAll("text")
+   .data(dataForD3)
+ .enter().append("svg:text")
+   .attr("dx", -3) // padding-right
+   .attr("dy", ".35em") // vertical-align: middle
+   .attr("text-anchor", "end") // text-align: right
+   .text(function(d, i) {return labelsForD3[i];});
 
-    chart.selectAll("text")
-     .data(dataForD3)
-   .enter().append("svg:text")
-     .attr("x", x)
-     .attr("y", function(d, i) {return i * barHeight + barHeight/2; })
-     .attr("dx", -3) // padding-right
-     .attr("dy", ".35em") // vertical-align: middle
-     .attr("text-anchor", "end") // text-align: right
-     .text(function(d, i) {return labelsForD3[i];});
-  } else if (options.bars == "vertical") {
-    // TODO
+  if (horizBars) {
+    texties.attr("x", leftMargin)
+      .attr("y", function(d, i) {return chartHeight - (i * barWidth + barWidth/2);});
+  } else {
+    // ROTATE
+    texties.attr("x", function(d, i) {return i * barWidth + barWidth/2 + leftMargin;})
+      .attr("y", chartHeight)
+      .attr("transform", function(d, i) {
+              return "rotate( -45 " + (i * barWidth + barWidth/2 + leftMargin) + "," + chartHeight + ")";
+            });
   }
-}
 
+}
 
 
 function initDragGui(variables, userData){
