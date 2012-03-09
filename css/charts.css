@@ -1,8 +1,9 @@
-.chart div {
+.chart rect {
+   stroke: white;
+   fill: steelblue;
+}
+
+.chart text {
    font: 10px sans-serif;
-   background-color: steelblue;
-   text-align: right;
-   padding: 3px;
-   margin: 1px;
-   color: white;
+   fill: white;
 }

@@ -58,10 +58,10 @@ function barplot(userData, options) {
   // options:
    // {factors: yVar.id, count: "events", bars: "horizontal",factorPerEvent: true}
 
-  var factorId = options.factors;
+  var factorId = options.factors; // this tells us what variable we're looking for
 
-  var factorValueCounts = {};
-  function addCount(val) {
+  var factorValueCounts = {};  // will be key = factor name, value = count
+  function addCount(val) { // helper function for counts dictionary
     if (factorValueCounts[val]) {
       factorValueCounts[val] += 1;
     } else {
@@ -95,22 +95,38 @@ function barplot(userData, options) {
   // TODO sort dataForD3 into an order that we like - make sort-order a drop-down or something
   // most -> least, least -> most, or alphabetical by factor?
 
+  var width = parseInt(d3.select("#imagearea").style("width").replace("px", ""));
+  var barHeight = 20;
 
-  // Create horiz. bar chart with d3.js
-  var chart = d3.select("#imagearea").attr("class", "chart");
+  var chart = d3.select("#imagearea").append("svg:svg")
+    .attr("class", "chart")
+    .attr("width", width)
+    .attr("height", barHeight * dataForD3.length);
 
-  // TODO scaling!!!!
   if (options.bars == "horizontal") {
 
+    // Create horiz. bar chart with d3.js
     var x = d3.scale.linear()
       .domain([0, d3.max(dataForD3)])
-      .range(["0px", chart.style("width")]);
+      .range([0, width]);
 
-    chart.selectAll("div")
+    chart.selectAll("rect")
       .data(dataForD3)
-    .enter().append("div")
-      .style("width", x)
-      .text(function(d, i) { return labelsForD3[i]; });
+    .enter().append("svg:rect")
+      .attr("y", function(d, i) {return i * barHeight; })
+      .attr("width", x)
+      .attr("height", barHeight);
+
+
+    chart.selectAll("text")
+     .data(dataForD3)
+   .enter().append("svg:text")
+     .attr("x", x)
+     .attr("y", function(d, i) {return i * barHeight + barHeight/2; })
+     .attr("dx", -3) // padding-right
+     .attr("dy", ".35em") // vertical-align: middle
+     .attr("text-anchor", "end") // text-align: right
+     .text(function(d, i) {return labelsForD3[i];});
   } else if (options.bars == "vertical") {
     // TODO
   }
