@@ -51,15 +51,27 @@ function scatterplot(xAxis, yAxis, dotType) {
 
 }
 
-function barplot(userData, options) {
-    // Test using case where xaxis is "user" and yaxis is "per user, factor"
-    // There will be others
+function traverseData(userData, options, callback) {
+  for (var i = 0; i < userData.length; i++) {
+    var val;
+    if (!options.varPerEvent) {   // expect factorId to match a field on the user
+      val = userData[i][ options.varId ];
+    }
+    if (options.count == "users") { // count users with each value of the factor
+      callback(val);
+    } else if (options.count == "events") { // count events
+      for (var j = 0; j < userData[i].events.length; j++) {
+        if (options.varPerEvent) {
+          val = userData[i].events[j][ options.varId ]; // expect factorId to match field on event
+        }
+        callback(val);
+      }
+    }
+  }
 
-  // options:
-   // {factors: yVar.id, count: "events", bars: "horizontal",factorPerEvent: true}
+}
 
-  var factorId = options.factors; // this tells us what variable we're looking for
-
+function countFactors(userData, options) {
   var factorValueCounts = {};  // will be key = factor name, value = count
   function addCount(val) { // helper function for counts dictionary
     if (factorValueCounts[val]) {
@@ -69,29 +81,73 @@ function barplot(userData, options) {
     }
   }
 
-  for (var i = 0; i < userData.length; i++) {
-    var val;
-    if (!options.factorPerEvent) {   // expect factorId to match a field on the user
-      val = userData[i][ factorId ];
+  // factorPerEvent, factorId, count "users" or "events"
+  traverseData(userData, options, addCount);
+
+  var counts = [];
+  var labels = [];
+  for (var val in factorValueCounts) {
+    labels.push(val);
+    counts.push(factorValueCounts[val]);
+  }
+  return {counts: counts, labels: labels};
+}
+
+function histogramify(userData, options) {
+  var labels = [];
+  var bucketCounts = [];
+  var min = null, max = null;
+  var numBuckets = 15; // TODO make this customizable
+
+  function compareMinMax(value) {
+    if (min == null) {
+      min = parseFloat(value);
+    } else if (value < min) {
+      min = parseFloat(value);
     }
-    if (options.count == "users") { // count users with each value of the factor
-      addCount(val);
-    } else if (options.count == "events") { // count events
-      for (var j = 0; j < userData[i].events.length; j++) {
-        if (options.factorPerEvent) {
-          val = userData[i].events[j][ factorId ]; // expect factorId to match field on event
-        }
-        addCount(val);
-      }
+    if (max == null) {
+      max = parseFloat(value);
+    } else if (value > max) {
+      max = parseFloat(value);
     }
   }
 
-  var dataForD3 = [];
-  var labelsForD3 = [];
-  for (var val in factorValueCounts) {
-    labelsForD3.push(val);
-    dataForD3.push(factorValueCounts[val]);
+  // find min and max values:
+  traverseData(userData, options, compareMinMax);
+
+  // calcuate bucket breakpoints
+  // TODO it's weird to have fractional breakpoints if variable is an integer!!
+  var breakpoints = [];
+  var bucketWidth = (max - min)/numBuckets;
+  for (var j = 0; j < numBuckets; j++) {
+    breakpoints.push( min +  j * bucketWidth);
+    // TODO control number of sig figs when float is written out
+    var name = (min + j * bucketWidth).toFixed(1) + " - " + (min + (j+1) * bucketWidth).toFixed(1);
+    console.log(name);
+    labels.push(name);
+    bucketCounts.push(0);
   }
+  breakpoints.push(max);
+
+  // go through a second time, create bucket counts
+  traverseData(userData, options, function(val) {
+    for (var j = 0; j < numBuckets; j++) {
+      if (val < (min + (j+1) * bucketWidth) ) {
+        bucketCounts[j] ++;
+        return;
+      }
+    }
+  });
+
+  return {counts: bucketCounts, labels: labels};
+}
+
+function barplot(data, options) {
+  // Test using case where xaxis is "user" and yaxis is "per user, factor"
+  // There will be others
+
+  var dataForD3 = data.counts;
+  var labelsForD3 = data.labels;
   // TODO sort dataForD3 into an order that we like - make sort-order a drop-down or something
   // most -> least, least -> most, or alphabetical by factor?
 
@@ -113,6 +169,7 @@ function barplot(userData, options) {
     .attr("transform", "translate(" + leftMargin + "," + (chartHeight) + ")scale(1,-1)");
   // um one problem... this flips all my text upside-down!!
 
+  // TODO should be able to choose linear or logarithmic scale
   var barLength = d3.scale.linear()
     .domain([0, d3.max(dataForD3)])
     .range([0, (horizBars? chartWidth : chartHeight)]);
@@ -193,14 +250,18 @@ function initDragGui(variables, userData){
       case "per_user":
         if (yVar.datatype == "factor") {
           $("#output").html("horizontal bar chart, num users in each per-user factor");
-          barplot(userData, {factors: yVar.id, count: "users", bars: "horizontal"});
+          var counts = countFactors(userData, {varId: yVar.id, count: "users"});
+          barplot(counts, {bars: "horizontal"});
         } else {
           $("#output").html("horizontal histogram using arbitrary buckets for continuous variable on y");
-          $("#the-graph-image").attr("src", "img/horiz-histogram.png");
+          var hist = histogramify(userData, {varId: yVar.id, count: "users"});
+          barplot(hist, {bars: "horizontal"});
         }
         break;
       case "event":
         $("#output").html("horizontal-bar histogram of num events per user");
+        // TODO this requires an argument to histogramify where we can just count events
+        // and not even look at any data fields...!
         $("#the-graph-image").attr("src", "img/horiz-histogram.png");
         break;
       case "per_event":
@@ -213,10 +274,12 @@ function initDragGui(variables, userData){
         case "user":
         if (xVar.datatype == "factor") {
           $("#output").html(" vertical bar chart, num users in each per-user factor");
-          barplot(userData, {factors: xVar.id, count: "users", bars: "vertical"});
+          var counts = countFactors(userData, {varId: xVar.id, count: "users"});
+          barplot(counts, {bars: "vertical"});
         } else {
           $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
-          $("#the-graph-image").attr("src", "img/histogram.png");
+          var hist = histogramify(userData, {varId: xVar.id, count: "users"});
+          barplot(hist, {bars: "vertical"});
         }
         break;
       case "per_user":
@@ -226,10 +289,12 @@ function initDragGui(variables, userData){
       case "event":
         if (xVar.datatype == "factor") {
           $("#output").html(" Bar chart - x-axis is the user-level factors, y-axis is number of events");
-          barplot(userData, {factors: xVar.id, count: "events", bars: "vertical"});
+          var counts = countFactors(userData, {varId: xVar.id, count: "events"});
+          barplot(counts, {bars: "vertical"});
         } else {
           $("#output").html(" Histogram - bucket continuous variable, y-axis is number of events");
-          $("#the-graph-image").attr("src", "img/histogram.png");
+          var hist = histogramify(userData, {varId: xVar.id, count: "events"});
+          barplot(hist, {bars: "vertical"});
         }
         break;
       case "per_event":
@@ -248,14 +313,17 @@ function initDragGui(variables, userData){
         case "user":
           $("#output").html(" vertical-bar histogram of num events per user");
           $("#the-graph-image").attr("src", "img/histogram.png");
+          // todo this is the weird one again, just floppified
         break;
       case "per_user":
         if (yVar.datatype == "factor") {
           $("#output").html(" Bar chart - y-axis is the user-level factors, x-axis is number of events");
-          barplot(userData, {factors: yVar.id, count: "events", bars: "horizontal"});
+          var counts = countFactors(userData, {varId: yVar.id, count: "events"});
+          barplot(counts, {bars: "horizontal"});
         } else {
           $("#output").html(" Histogram - bucket continuous variable, x-axis is number of events");
-          $("#the-graph-image").attr("src", "img/horiz-histogram.png");
+          var hist = histogramify(userData, {varId: yVar.id, count: "events"});
+          barplot(hist, {bars: "horizontal"});
         }
         break;
       case "event":
@@ -264,11 +332,14 @@ function initDragGui(variables, userData){
       case "per_event":
         if (yVar.datatype == "factor") {
           $("#output").html(" horizontal bar chart, num events in each per-event factor group");
-          barplot(userData, {factors: yVar.id, count: "events", bars: "horizontal",
-                             factorPerEvent: true});
+          var counts = countFactors(userData, {varId: yVar.id, count: "events",
+                             varPerEvent: true});
+          barplot(counts, { bars: "horizontal"});
         } else {
           $("#output").html(" horizontal histogram using arbitrary buckets for continuous variable on y");
-          $("#the-graph-image").attr("src", "img/horiz-histogram.png");
+          var hist = histogramify(userData, {varId: yVar.id, count: "events",
+                                             varPerEvent: true});
+          barplot(hist, {bars: "horizontal"});
         }
         break;
       }
@@ -287,13 +358,16 @@ function initDragGui(variables, userData){
       case "event":
         if (xVar.datatype == "factor") {
           $("#output").html(" vertical bar chart, num events in each per-event factor group");
-          barplot(userData, {factors: xVar.id, count: "events", bars: "vertical",
-                             factorPerEvent: true});
+          var counts = countFactors(userData, {varId: xVar.id, count: "events",
+                                               varPerEvent: true});
+          barplot(counts, { bars: "vertical"});
         } else {
           $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
           $("#the-graph-image").attr("src", "img/histogram.png");
+          var hist = histogramify(userData,  {varId: xVar.id, count: "events",
+                                              varPerEvent: true});
+          barplot(hist, {bars: "vertical"});
         }
-
         break;
       case "per_event":
         scatterplot(xVar, yVar, "event"); // scatterplot, each dot is event
