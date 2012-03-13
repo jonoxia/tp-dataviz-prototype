@@ -22,10 +22,8 @@ function updateFragment(params) {
 //  to determine axes for all
  */
 
-
-
-function scatterplot(xAxis, yAxis, dotType) {
-  var dots;
+// ui item, number of extensions
+function scatterplot(userData, xVar, yVar, options) {
   // If x and y variables are both user/per user, dots in scatterplot are users.
   // If at least one axis is event-level, though, dots have to be events.
 
@@ -36,17 +34,107 @@ function scatterplot(xAxis, yAxis, dotType) {
   //     --> events (all users lumped together)
   //     --> users (average value per user)
 
-  if (xAxis.datatype == "factor" && yAxis.datatype == "factor") {
+  if (xVar.datatype == "factor" && yVar.datatype == "factor") {
     $("#output").html("Make a grid of factor vs. factor, plot users/events in each one");
-  } else if (xAxis.datatype == "factor") {
+  } else if (xVar.datatype == "factor") {
     $("#output").html("Factor on the x axis,continous on the y axis, scatter points");
     $("#the-graph-image").attr("src", "img/density-bars.png");
-  } else if (yAxis.datatype == "factor") {
+  } else if (yVar.datatype == "factor") {
     $("#output").html("Continuous on the  x axis, factor on the y axis, scatter points");
     $("#the-graph-image").attr("src", "img/horiz-density-bars.png");
   } else {
-    $("#output").html("Continuous scatter on both axes.");
-    $("#the-graph-image").attr("src", "img/scatter.png");
+
+    // TODO the width/height/create container/create chart stuff is duplicated in barplot...
+    // choose timestamp vs. num extensions (yeah i know that's silly) to test this out.
+
+    var margin = 40;
+
+    var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
+    var chartHeight = 600 - 2 * margin; // or somethin?
+
+    var chart = d3.select("#imagearea").append("svg:svg")
+      .attr("width", chartWidth + 2 * margin)
+      .attr("height", chartHeight + 2 * margin)
+      .attr("class", "chart")
+      .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
+
+    // OK we got to retrieve some data now...
+
+    //var dataPoints = [{x: 1, y: 10}, {x: 2, y: 3}, {x: 2, y: 4}, {x: 10, y: 8}];
+    var dataPoints = [];
+
+    // This is close to, but not exactly the same as, traverseData
+    // because each point will have an x and a y...
+    for (var i = 0; i < userData.length; i++) {
+      var newX, newY, numEvents;
+      if (!options.xIsPerEvent) {
+        newX = parseFloat(userData[i][ xVar.id ]); // TODO don't parsefloat if it's a factor
+      }
+      if (!options.yIsPerEvent) {
+        newY = parseFloat(userData[i][ yVar.id ]);
+      }
+      if (options.dotType == "user") {
+        dataPoints.push( {x: newX, y: newY} );
+      }
+      else {
+        numEvents = userData[i].events.length;
+        if (numEvents < 200) {
+          // Guard against mega-users because otherwise this triggers "unresponsive script"
+          for (var j = 0; j < numEvents; j++) {
+            if (options.xIsPerEvent) {
+              newX = parseFloat(userData[i].events[j][ xVar.id ]);
+            }
+            if (options.yIsPerEvent) {
+              newY = parseFloat(userData[i].events[j][ yVar.id ]);
+            }
+            dataPoints.push({x: newX, y: newY});
+          }
+        }
+      }
+    }
+
+   var xScale = d3.scale.linear() // different scale needed if either axis is factor-type.
+      .domain([d3.min(dataPoints, function(pt) {return pt.x;}),
+               d3.max(dataPoints, function(pt) { return pt.x;})])
+      .range([0, chartWidth]);
+
+    var yScale = d3.scale.linear()
+      .domain([d3.min(dataPoints, function(pt) {return pt.y;}),
+               d3.max(dataPoints, function(pt) { return pt.y;})])
+      .range([chartHeight, 0]);
+
+    // how do i shot web
+    // I mean, how do i make axis draw?
+    var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .ticks(4)
+    .tickSize(6, 3, 0)
+    .orient("right"); // makes it vertical
+
+    var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(4)
+    .tickSize(6, 3, 0);
+
+    // Add the x-axis:
+    chart.append("svg:g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0, " + chartHeight + ")")
+      .call(xAxis);
+
+     // Add the y-axis.
+    chart.append("svg:g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + chartWidth + ",0)")
+      .call(yAxis);
+
+    chart.selectAll("circle")
+      .data(dataPoints)
+    .enter().append("svg:circle")
+      .attr("r", 2)
+      .attr("cx", function(d) { return xScale(d.x); })
+      .attr("cy", function(d) { return yScale(d.y); });
+
   }
 
 }
@@ -167,7 +255,6 @@ function barplot(data, options) {
   var chart = container.append("svg:g")
     .attr("class", "chart")
     .attr("transform", "translate(" + leftMargin + "," + (chartHeight) + ")scale(1,-1)");
-  // um one problem... this flips all my text upside-down!!
 
   // TODO should be able to choose linear or logarithmic scale
   var barLength = d3.scale.linear()
@@ -284,7 +371,7 @@ function initDragGui(variables, userData){
         break;
       case "per_user":
         $("#output").html(" Scatterplot, each dot is a user; using jitter for any axis that is a factor");
-        $("#the-graph-image").attr("src", "img/scatter.png"); // TODO actually could be density bars
+        scatterplot(userData, xVar, yVar, {dotType: "user"});
         break;
       case "event":
         if (xVar.datatype == "factor") {
@@ -302,8 +389,8 @@ function initDragGui(variables, userData){
           $("#output").html(" User-level factor is groups on x-axis, each event is a dot, scatter-density bars");
           $("#the-graph-image").attr("src", "img/density-bars.png");
         } else {
+          scatterplot(userData, xVar, yVar, {yIsPerEvent: true, dotType: "event"});
           $("#output").html(" Scatter plot, each dot is an event");
-          $("#the-graph-image").attr("src", "img/scatter.png");
         }
         break;
       }
@@ -348,12 +435,12 @@ function initDragGui(variables, userData){
     case "per_event":
       switch (yVar.semantics) {
       case "user":
-        $("#output").html(" TODO THIS IS THE HARD ONE!!");
+        $("#output").html("TODO THIS IS THE HARD ONE!!");
         // need to aggregate the per-event variable for each user -- e.g.
         // producing the 'average event value' per user and plotting that.
         break;
       case "per_user":
-        scatterplot(xVar, yVar, "event"); // scatterplot, each dot is event
+        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, dotType: "event"});
         break;
       case "event":
         if (xVar.datatype == "factor") {
@@ -370,7 +457,7 @@ function initDragGui(variables, userData){
         }
         break;
       case "per_event":
-        scatterplot(xVar, yVar, "event"); // scatterplot, each dot is event
+        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, yIsPerEvent: true, dotType: "event"});
         break;
       }
       break;

@@ -7,3 +7,18 @@
    font: 10px sans-serif;
    fill: black;
 }
+
+.chart circle {
+    fill: red;
+}
+
+
+.y.axis line, .y.axis path {
+  fill: none;
+  stroke: #000;
+}
+
+.x.axis line, .x.axis path {
+  fill: none;
+  stroke: #000;
+}
