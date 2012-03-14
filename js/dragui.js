@@ -34,109 +34,142 @@ function scatterplot(userData, xVar, yVar, options) {
   //     --> events (all users lumped together)
   //     --> users (average value per user)
 
-  if (xVar.datatype == "factor" && yVar.datatype == "factor") {
-    $("#output").html("Make a grid of factor vs. factor, plot users/events in each one");
-  } else if (xVar.datatype == "factor") {
-    $("#output").html("Factor on the x axis,continous on the y axis, scatter points");
-    $("#the-graph-image").attr("src", "img/density-bars.png");
-  } else if (yVar.datatype == "factor") {
-    $("#output").html("Continuous on the  x axis, factor on the y axis, scatter points");
-    $("#the-graph-image").attr("src", "img/horiz-density-bars.png");
-  } else {
+  // TODO the width/height/create container/create chart stuff is duplicated in barplot...
+  // choose timestamp vs. num extensions (yeah i know that's silly) to test this out.
 
-    // TODO the width/height/create container/create chart stuff is duplicated in barplot...
-    // choose timestamp vs. num extensions (yeah i know that's silly) to test this out.
+  var margin = 40;
 
-    var margin = 40;
+  var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
+  var chartHeight = 600 - 2 * margin; // or somethin?
 
-    var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
-    var chartHeight = 600 - 2 * margin; // or somethin?
+  var chart = d3.select("#imagearea").append("svg:svg")
+    .attr("width", chartWidth + 2 * margin)
+    .attr("height", chartHeight + 2 * margin)
+    .attr("class", "chart")
+    .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
 
-    var chart = d3.select("#imagearea").append("svg:svg")
-      .attr("width", chartWidth + 2 * margin)
-      .attr("height", chartHeight + 2 * margin)
-      .attr("class", "chart")
-      .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
 
-    // OK we got to retrieve some data now...
+  var dataPoints = [];
 
-    //var dataPoints = [{x: 1, y: 10}, {x: 2, y: 3}, {x: 2, y: 4}, {x: 10, y: 8}];
-    var dataPoints = [];
+  function getXVarVal(record) {
+    var newX = record[ xVar.id ];
+    if (xVar.datatype != "factor") {
+      newX = parseFloat(newX);
+    }
+    return newX;
+  }
 
-    // This is close to, but not exactly the same as, traverseData
-    // because each point will have an x and a y...
-    for (var i = 0; i < userData.length; i++) {
-      var newX, newY, numEvents;
-      if (!options.xIsPerEvent) {
-        newX = parseFloat(userData[i][ xVar.id ]); // TODO don't parsefloat if it's a factor
-      }
-      if (!options.yIsPerEvent) {
-        newY = parseFloat(userData[i][ yVar.id ]);
-      }
-      if (options.dotType == "user") {
-        dataPoints.push( {x: newX, y: newY} );
-      }
-      else {
-        numEvents = userData[i].events.length;
-        if (numEvents < 200) {
-          // Guard against mega-users because otherwise this triggers "unresponsive script"
-          for (var j = 0; j < numEvents; j++) {
-            if (options.xIsPerEvent) {
-              newX = parseFloat(userData[i].events[j][ xVar.id ]);
-            }
-            if (options.yIsPerEvent) {
-              newY = parseFloat(userData[i].events[j][ yVar.id ]);
-            }
-            dataPoints.push({x: newX, y: newY});
+  function getYVarVal(record) {
+    var newY = record[ yVar.id ];
+    if (yVar.datatype != "factor") {
+      newY = parseFloat(newY);
+    }
+    return newY;
+  }
+
+  // This is close to, but not exactly the same as, traverseData
+  // because each point will have an x and a y...
+  for (var i = 0; i < userData.length; i++) {
+    var newX, newY, numEvents;
+    if (!options.xIsPerEvent) {
+      newX = getXVarVal(userData[i]);
+    }
+    if (!options.yIsPerEvent) {
+      newY = getYVarVal(userData[i]);
+    }
+    if (options.dotType == "user") {
+      dataPoints.push( {x: newX, y: newY} );
+    }
+    else {
+      numEvents = userData[i].events.length;
+      if (numEvents < 200) {
+        // Guard against mega-users because otherwise this triggers "unresponsive script"
+        for (var j = 0; j < numEvents; j++) {
+          if (options.xIsPerEvent) {
+            newX = getXVarVal(userData[i].events[j]);
           }
+          if (options.yIsPerEvent) {
+            newY = getYVarVal(userData[i].events[j]);
+          }
+          dataPoints.push({x: newX, y: newY});
         }
       }
     }
+  }
 
-   var xScale = d3.scale.linear() // different scale needed if either axis is factor-type.
+  var xScale, yScale;
+
+  if (xVar.datatype == "factor") {
+    // Create ordinal scale
+    var discreteXVals = {};
+    var xVals = [];
+    for (i = 0; i < dataPoints.length; i++) {
+      discreteXVals[ dataPoints[i].x ] = 1;
+    }
+    for (var name in discreteXVals) {
+      xVals.push(name);
+    }
+    xScale = d3.scale.ordinal()
+      .domain(xVals)
+      .rangeBands([0, chartWidth]);
+  } else {
+    // Create numerical scale:
+   xScale = d3.scale.linear()
       .domain([d3.min(dataPoints, function(pt) {return pt.x;}),
                d3.max(dataPoints, function(pt) { return pt.x;})])
       .range([0, chartWidth]);
+  }
 
-    var yScale = d3.scale.linear()
+  if (yVar.datatype == "factor") {
+    // Create ordinal y scale
+    var discreteYVals = {};
+    var yVals = [];
+    for (i = 0; i < dataPoints.length; i++) {
+      discreteYVals[ dataPoints[i].y ] = 1;
+    }
+    for (var name in discreteYVals) {
+      yVals.push(name);
+    }
+    yScale = d3.scale.ordinal()
+      .domain(yVals)
+      .rangeBands([0, chartHeight]);
+  } else {
+    // Create numerical y scale
+    yScale = d3.scale.linear()
       .domain([d3.min(dataPoints, function(pt) {return pt.y;}),
                d3.max(dataPoints, function(pt) { return pt.y;})])
       .range([chartHeight, 0]);
+  }
 
-    // how do i shot web
-    // I mean, how do i make axis draw?
-    var yAxis = d3.svg.axis()
+  var yAxis = d3.svg.axis()
     .scale(yScale)
     .ticks(4)
     .tickSize(6, 3, 0)
     .orient("right"); // makes it vertical
 
-    var xAxis = d3.svg.axis()
+  var xAxis = d3.svg.axis()
     .scale(xScale)
     .ticks(4)
     .tickSize(6, 3, 0);
 
-    // Add the x-axis:
-    chart.append("svg:g")
+  // Add the x-axis:
+  chart.append("svg:g")
       .attr("class", "x axis")
       .attr("transform", "translate(0, " + chartHeight + ")")
       .call(xAxis);
 
-     // Add the y-axis.
-    chart.append("svg:g")
+  // Add the y-axis.
+  chart.append("svg:g")
       .attr("class", "y axis")
       .attr("transform", "translate(" + chartWidth + ",0)")
       .call(yAxis);
 
-    chart.selectAll("circle")
+  chart.selectAll("circle")
       .data(dataPoints)
-    .enter().append("svg:circle")
+      .enter().append("svg:circle")
       .attr("r", 2)
       .attr("cx", function(d) { return xScale(d.x); })
       .attr("cy", function(d) { return yScale(d.y); });
-
-  }
-
 }
 
 function traverseData(userData, options, callback) {
