@@ -164,12 +164,29 @@ function scatterplot(userData, xVar, yVar, options) {
       .attr("transform", "translate(" + chartWidth + ",0)")
       .call(yAxis);
 
+  var xMapper, yMapper;
+  if (xVar.datatype == "factor") {
+    // add some jitter
+    xMapper = function(d) {
+      return xScale(d.x) + xScale.rangeBand() * ( 0.4 + Math.random() * 0.2);
+    };
+  } else {
+    xMapper = function(d) { return xScale(d.x); };
+  }
+  if (yVar.datatype == "factor") {
+    yMapper = function(d) {
+      return yScale(d.y) + yScale.rangeBand() * ( 0.4 + Math.random() * 0.2);
+    };
+  } else {
+    yMapper = function(d) { return yScale(d.y); };
+  }
+
   chart.selectAll("circle")
-      .data(dataPoints)
-      .enter().append("svg:circle")
-      .attr("r", 2)
-      .attr("cx", function(d) { return xScale(d.x); })
-      .attr("cy", function(d) { return yScale(d.y); });
+    .data(dataPoints)
+    .enter().append("svg:circle")
+    .attr("r", 2)
+    .attr("cx", xMapper)
+    .attr("cy", yMapper);
 }
 
 function traverseData(userData, options, callback) {
