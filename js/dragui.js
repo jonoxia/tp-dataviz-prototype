@@ -8,7 +8,6 @@ function updateFragment(params) {
   window.location = baseLoc + "#" + args.join("&");
 }
 
-
 /*
  *   go to ggplot2 page
 
@@ -70,15 +69,20 @@ function scatterplot(userData, xVar, yVar, options) {
   // This is close to, but not exactly the same as, traverseData
   // because each point will have an x and a y...
   for (var i = 0; i < userData.length; i++) {
-    var newX, newY, numEvents;
+    var newX, newY, numEvents, newColor = null;
     if (!options.xIsPerEvent) {
       newX = getXVarVal(userData[i]);
     }
     if (!options.yIsPerEvent) {
       newY = getYVarVal(userData[i]);
     }
+    // Assume color is always factor-type and per-user.
+    // TODO: color could be an event property sometimes?
+    if (options.colorVar) {
+      newColor = userData[i][ options.colorVar.id ];
+    }
     if (options.dotType == "user") {
-      dataPoints.push( {x: newX, y: newY} );
+      dataPoints.push( {x: newX, y: newY, c: newColor} );
     }
     else {
       numEvents = userData[i].events.length;
@@ -91,13 +95,26 @@ function scatterplot(userData, xVar, yVar, options) {
           if (options.yIsPerEvent) {
             newY = getYVarVal(userData[i].events[j]);
           }
-          dataPoints.push({x: newX, y: newY});
+          dataPoints.push({x: newX, y: newY, c: newColor});
         }
       }
     }
   }
 
   var xScale, yScale;
+
+  var colorMap = {};
+  if (options.colorVar) {
+    // note a lot of duplicated code - write a "getuniquevaluelist" function
+    var lastColorUsed = 0;
+    for (i = 0; i < dataPoints.length; i++) {
+      var colorVal = dataPoints[i].c;
+      if (! colorMap[ colorVal ]) {
+        lastColorUsed++;
+        colorMap[ colorVal ] = "dataset-" + lastColorUsed; // corresponds to css class name
+      }
+    }
+  }
 
   if (xVar.datatype == "factor") {
     // Create ordinal scale
@@ -181,9 +198,17 @@ function scatterplot(userData, xVar, yVar, options) {
     yMapper = function(d) { return yScale(d.y); };
   }
 
+  var colorMapper = function(d) {
+    if (options.colorVar) {
+      return colorMap[ d.c ];
+    }
+    return "dataset-1";
+  };
+
   chart.selectAll("circle")
     .data(dataPoints)
     .enter().append("svg:circle")
+    .attr("class", colorMapper)
     .attr("r", 2)
     .attr("cx", xMapper)
     .attr("cy", yMapper);
@@ -259,7 +284,7 @@ function histogramify(userData, options) {
   var bucketWidth = (max - min)/numBuckets;
   for (var j = 0; j < numBuckets; j++) {
     breakpoints.push( min +  j * bucketWidth);
-    // TODO control number of sig figs when float is written out
+    // control number of sig figs when float is written out
     var name = (min + j * bucketWidth).toFixed(1) + " - " + (min + (j+1) * bucketWidth).toFixed(1);
     console.log(name);
     labels.push(name);
@@ -344,7 +369,6 @@ function barplot(data, options) {
 
 }
 
-
 function initDragGui(variables, userData){
 
   function getVarById(varId) {
@@ -360,21 +384,10 @@ function initDragGui(variables, userData){
     var xVar = getVarById(params["x-axis"]);
     var yVar = getVarById(params["y-axis"]);
 
-    if (params["color"] && (params["lattice-x"] || params["lattice-y"])) {
-      $("#the-graph-image").attr("src", "img/compare-new.png");
-      return;
-    }
-    if (params["lattice-y"]) {
-      $("#the-graph-image").attr("src", "img/hist-unsorted.png");
-      return;
-    }
-    if (params["lattice-x"]) {
-      $("#the-graph-image").attr("src", "img/3stooges.png");
-      return;
-    }
+    // TODO: Lattice-wrap not yet implemented.
+    var colorVar = null;
     if (params["color"]) {
-      $("#the-graph-image").attr("src", "img/directlabel-011.png");
-      return;
+      colorVar = getVarById(params["color"]);
     }
 
     switch( xVar.semantics ) {
@@ -421,7 +434,7 @@ function initDragGui(variables, userData){
         break;
       case "per_user":
         $("#output").html(" Scatterplot, each dot is a user; using jitter for any axis that is a factor");
-        scatterplot(userData, xVar, yVar, {dotType: "user"});
+        scatterplot(userData, xVar, yVar, {dotType: "user", colorVar: colorVar});
         break;
       case "event":
         if (xVar.datatype == "factor") {
@@ -439,7 +452,7 @@ function initDragGui(variables, userData){
           $("#output").html(" User-level factor is groups on x-axis, each event is a dot, scatter-density bars");
           $("#the-graph-image").attr("src", "img/density-bars.png");
         } else {
-          scatterplot(userData, xVar, yVar, {yIsPerEvent: true, dotType: "event"});
+          scatterplot(userData, xVar, yVar, {yIsPerEvent: true, dotType: "event", colorVar: colorVar});
           $("#output").html(" Scatter plot, each dot is an event");
         }
         break;
@@ -490,7 +503,7 @@ function initDragGui(variables, userData){
         // producing the 'average event value' per user and plotting that.
         break;
       case "per_user":
-        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, dotType: "event"});
+        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, dotType: "event", colorVar: colorVar});
         break;
       case "event":
         if (xVar.datatype == "factor") {
@@ -507,7 +520,7 @@ function initDragGui(variables, userData){
         }
         break;
       case "per_event":
-        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, yIsPerEvent: true, dotType: "event"});
+        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, yIsPerEvent: true, dotType: "event", colorVar: colorVar});
         break;
       }
       break;

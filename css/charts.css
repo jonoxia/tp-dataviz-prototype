@@ -8,10 +8,33 @@
    fill: black;
 }
 
-.chart circle {
+.chart .dataset-1 {
     fill: red;
 }
 
+.chart .dataset-2 {
+    fill: blue;
+}
+
+.chart .dataset-3 {
+    fill: green;
+}
+
+.chart .dataset-4 {
+    fill: black;
+}
+
+.chart .dataset-5 {
+    fill: purple;
+}
+
+.chart .dataset-6 {
+    fill: orange;
+}
+
+.chart .dataset-7 {
+    fill: grey;
+}
 
 .y.axis line, .y.axis path {
   fill: none;
