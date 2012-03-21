@@ -11,6 +11,24 @@
 //  to determine axes for all
  */
 
+
+
+/* To do latticing:
+ * 1. factor out the part that decides on the width and height of the svg rectangle
+ * 2. factor out the part that draws the graph; take width/height as params
+ * 3. if there is a lattice, then split the data into separate bookets one for each value...
+ * 4. count the values, decide how small each minigraph gets to be
+ * 5. call #2 once with each data booket.
+ *
+ * 6. Assume there's always lattices and just the lattice number = 1
+ *
+ * 7. when calculating lattices - they all have to have the same axes so get the min-max
+ *   x and y limits over ALL of them
+ *
+ * first pass get all parameters, second pass through iterate all data points and draw them
+ *
+ */
+
 // ui item, number of extensions
 function scatterplot(userData, xVar, yVar, options) {
   // If x and y variables are both user/per user, dots in scatterplot are users.
@@ -199,7 +217,7 @@ function scatterplot(userData, xVar, yVar, options) {
     .data(dataPoints)
     .enter().append("svg:circle")
     .attr("class", colorMapper)
-    .attr("r", 2)
+    .attr("r", 4)
     .attr("cx", xMapper)
     .attr("cy", yMapper);
 }
