@@ -39,7 +39,7 @@ function initDragGui(variables, userData){
       case "per_user":
         if (yVar.datatype == "factor") {
           $("#output").html("horizontal bar chart, num users in each per-user factor");
-          var counts = countFactors(userData, {varId: yVar.id, count: "users"});
+          var counts = countFactors(userData, {varId: yVar.id, count: "users", colorVar: colorVar});
           barplot(counts, {bars: "horizontal"});
         } else {
           $("#output").html("horizontal histogram using arbitrary buckets for continuous variable on y");
@@ -63,7 +63,7 @@ function initDragGui(variables, userData){
         case "user":
         if (xVar.datatype == "factor") {
           $("#output").html(" vertical bar chart, num users in each per-user factor");
-          var counts = countFactors(userData, {varId: xVar.id, count: "users"});
+          var counts = countFactors(userData, {varId: xVar.id, count: "users", colorVar: colorVar});
           barplot(counts, {bars: "vertical"});
         } else {
           $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
@@ -78,7 +78,7 @@ function initDragGui(variables, userData){
       case "event":
         if (xVar.datatype == "factor") {
           $("#output").html(" Bar chart - x-axis is the user-level factors, y-axis is number of events");
-          var counts = countFactors(userData, {varId: xVar.id, count: "events"});
+          var counts = countFactors(userData, {varId: xVar.id, count: "events", colorVar: colorVar});
           barplot(counts, {bars: "vertical"});
         } else {
           $("#output").html(" Histogram - bucket continuous variable, y-axis is number of events");
@@ -107,7 +107,7 @@ function initDragGui(variables, userData){
       case "per_user":
         if (yVar.datatype == "factor") {
           $("#output").html(" Bar chart - y-axis is the user-level factors, x-axis is number of events");
-          var counts = countFactors(userData, {varId: yVar.id, count: "events"});
+          var counts = countFactors(userData, {varId: yVar.id, count: "events", colorVar: colorVar});
           barplot(counts, {bars: "horizontal"});
         } else {
           $("#output").html(" Histogram - bucket continuous variable, x-axis is number of events");
@@ -122,7 +122,7 @@ function initDragGui(variables, userData){
         if (yVar.datatype == "factor") {
           $("#output").html(" horizontal bar chart, num events in each per-event factor group");
           var counts = countFactors(userData, {varId: yVar.id, count: "events",
-                             varPerEvent: true});
+                             varPerEvent: true, colorVar: colorVar});
           barplot(counts, { bars: "horizontal"});
         } else {
           $("#output").html(" horizontal histogram using arbitrary buckets for continuous variable on y");
@@ -148,7 +148,7 @@ function initDragGui(variables, userData){
         if (xVar.datatype == "factor") {
           $("#output").html(" vertical bar chart, num events in each per-event factor group");
           var counts = countFactors(userData, {varId: xVar.id, count: "events",
-                                               varPerEvent: true});
+                                               varPerEvent: true, colorVar: colorVar});
           barplot(counts, { bars: "vertical"});
         } else {
           $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
