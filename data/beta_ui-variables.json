@@ -24,14 +24,6 @@
     "description": "Name of the toolbar button or menu item used."
   },
   {
-    "datatype": "timestamp",
-    "semantics": "per_event",
-    "url": "",
-    "id": "timestamp", 
-    "name": "Time", 
-    "description": "Time when the UI item was used."
-  },
-  {
     "datatype": "integer",
     "semantics": "event",
     "url": "", 
@@ -70,5 +62,37 @@
     "id": "location", 
     "name": "Locale", 
     "description": "What was the user's Firefox locale setting?"
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "customize_menu_bar", 
+    "name": "Menu bar setting", 
+    "description": "Did the user have the menu bar shown or hidden?"
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "customize_bookmark_bar", 
+    "name": "Bookmark bar setting", 
+    "description": "Did the user have the bookmarks bar shown or hidden?"
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "customize_status_bar", 
+    "name": "Status bar setting", 
+    "description": "Did hte user have the status bar shown or hidden?"
+  },
+  {
+    "datatype": "factor",
+    "semantics": "per_user", 
+    "url": "", 
+    "id": "customize_tabs", 
+    "name": "Tab bar setting", 
+    "description": "Did the user have tabs on the top or on the bottom?"
   }
 ]
