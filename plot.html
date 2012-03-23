@@ -135,7 +135,9 @@
     
     function makeattrmenu() {
       $.getJSON("data/beta_ui-variables.json", function(variables) {
-        $.getJSON("data/beta_ui-data.json", function(userData) {
+        console.log("I got the variables file");
+        $.getJSON("data/beta_ui-data-users.json", function(userData) {
+          console.log("I got the users file");
           var menu = $("#variables_menu");
           menu.empty();
           $.each(variables, function(key, val) {

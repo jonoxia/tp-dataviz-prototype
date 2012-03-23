@@ -252,8 +252,9 @@ function countFactors(userData, options) {
     }
   }
 
-  // factorPerEvent, factorId, count "users" or "events"
-  traverseData(userData, options, addCount);
+  for (var i = 0; i < userData.length; i++) {
+    addCount( userData[i][ options.varId ]);
+  }
 
   var counts = [];
   var labels = [];
@@ -263,6 +264,18 @@ function countFactors(userData, options) {
   }
   return {counts: counts, labels: labels};
 }
+
+/* customizations:
+ *
+ * menu bar hidden
+ * menu bar shown
+ * tabs on top
+ * tabs on bottom
+ * bookmark bar hidden
+ * bookmark bar shown
+ * status bar shown
+ * status bar hidden
+ */
 
 function histogramify(userData, options) {
   var labels = [];
@@ -284,7 +297,9 @@ function histogramify(userData, options) {
   }
 
   // find min and max values:
-  traverseData(userData, options, compareMinMax);
+  for (var i = 0; i < userData.length; i++) {
+    compareMinMax( userData[i][ options.varId ] );
+  }
 
   // calcuate bucket breakpoints
   // TODO it's weird to have fractional breakpoints if variable is an integer!!

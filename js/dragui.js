@@ -49,9 +49,9 @@ function initDragGui(variables, userData){
         break;
       case "event":
         $("#output").html("horizontal-bar histogram of num events per user");
-        // TODO this requires an argument to histogramify where we can just count events
-        // and not even look at any data fields...!
-        $("#the-graph-image").attr("src", "img/horiz-histogram.png");
+        // name of field counting events is numEvents
+        var hist = histogramify(userData, {varId: "numEvents", count: "users"});
+        barplot(hist, {bars: "horizontal"});
         break;
       case "per_event":
         $("#output").html("TODO THIS IS THE HARD ONE");
@@ -101,8 +101,9 @@ function initDragGui(variables, userData){
       switch (yVar.semantics) {
         case "user":
           $("#output").html(" vertical-bar histogram of num events per user");
-          $("#the-graph-image").attr("src", "img/histogram.png");
-          // todo this is the weird one again, just floppified
+          // name of field counting events is numEvents
+          var hist = histogramify(userData, {varId: "numEvents", count: "users"});
+          barplot(hist, {bars: "vertical"});
         break;
       case "per_user":
         if (yVar.datatype == "factor") {
