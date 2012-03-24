@@ -17,7 +17,7 @@
   },
   {
     "datatype": "factor",
-    "semantics": "per_event",
+    "semantics": "event_name",
     "url": "", 
     "id": "item", 
     "name": "UI item", 
@@ -25,7 +25,7 @@
   },
   {
     "datatype": "integer",
-    "semantics": "event",
+    "semantics": "event_count",
     "url": "", 
     "id": "num_actions", 
     "name": "Number of Actions", 

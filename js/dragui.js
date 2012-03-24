@@ -19,6 +19,23 @@ function initDragGui(variables, userData){
     return null;
   }
 
+  function someKindOfBarPlot(userData, options) {
+    var counts;
+    // OK height of bars will be number of users, but what exactly are we counting here?
+    console.log("Some kind of bar plot: datatype is " + options.variable.datatype + " semantics is " + options.variable.semantics);
+    if (options.variable.semantics == "event_count") {
+      counts = histogramify(userData, {varId: "numEvents", colorVar: options.colorVar});
+    } else if (options.variable.semantics == "event_name") {
+      $("#output").html("Bars represent the number of users who clicked the item at least once.");
+      counts = whoDidAtLeastOnce(userData, {colorVar: options.colorVar});
+    } else if (options.variable.datatype == "factor") {
+      counts = countFactors(userData, {varId: options.variable.id, colorVar: options.colorVar});
+    } else {
+      counts = histogramify(userData, {varId: options.variable.id, colorVar: options.colorVar});
+    }
+    barplot(counts, {bars: options.bars});
+  }
+
   function drawNewGraph(params) {
     var xVar = getVarById(params["x-axis"]);
     var yVar = getVarById(params["y-axis"]);
@@ -29,142 +46,26 @@ function initDragGui(variables, userData){
       colorVar = getVarById(params["color"]);
     }
 
-    switch( xVar.semantics ) {
-    case "user":
-      switch (yVar.semantics) {
-        case "user":
-          return;
-          // invalid
-        break;
-      case "per_user":
-        if (yVar.datatype == "factor") {
-          $("#output").html("horizontal bar chart, num users in each per-user factor");
-          var counts = countFactors(userData, {varId: yVar.id, count: "users", colorVar: colorVar});
-          barplot(counts, {bars: "horizontal"});
-        } else {
-          $("#output").html("horizontal histogram using arbitrary buckets for continuous variable on y");
-          var hist = histogramify(userData, {varId: yVar.id, count: "users"});
-          barplot(hist, {bars: "horizontal"});
-        }
-        break;
-      case "event":
-        $("#output").html("horizontal-bar histogram of num events per user");
-        // name of field counting events is numEvents
-        var hist = histogramify(userData, {varId: "numEvents", count: "users"});
-        barplot(hist, {bars: "horizontal"});
-        break;
-      case "per_event":
-        $("#output").html("TODO THIS IS THE HARD ONE");
-        break;
-      }
-      break;
-    case "per_user":
-      switch (yVar.semantics) {
-        case "user":
-        if (xVar.datatype == "factor") {
-          $("#output").html(" vertical bar chart, num users in each per-user factor");
-          var counts = countFactors(userData, {varId: xVar.id, count: "users", colorVar: colorVar});
-          barplot(counts, {bars: "vertical"});
-        } else {
-          $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
-          var hist = histogramify(userData, {varId: xVar.id, count: "users"});
-          barplot(hist, {bars: "vertical"});
-        }
-        break;
-      case "per_user":
-        $("#output").html(" Scatterplot, each dot is a user; using jitter for any axis that is a factor");
-        scatterplot(userData, xVar, yVar, {dotType: "user", colorVar: colorVar});
-        break;
-      case "event":
-        if (xVar.datatype == "factor") {
-          $("#output").html(" Bar chart - x-axis is the user-level factors, y-axis is number of events");
-          var counts = countFactors(userData, {varId: xVar.id, count: "events", colorVar: colorVar});
-          barplot(counts, {bars: "vertical"});
-        } else {
-          $("#output").html(" Histogram - bucket continuous variable, y-axis is number of events");
-          var hist = histogramify(userData, {varId: xVar.id, count: "events"});
-          barplot(hist, {bars: "vertical"});
-        }
-        break;
-      case "per_event":
-        if (xVar.datatype == "factor") {
-          $("#output").html(" User-level factor is groups on x-axis, each event is a dot, scatter-density bars");
-          $("#the-graph-image").attr("src", "img/density-bars.png");
-        } else {
-          scatterplot(userData, xVar, yVar, {yIsPerEvent: true, dotType: "event", colorVar: colorVar});
-          $("#output").html(" Scatter plot, each dot is an event");
-        }
-        break;
-      }
-      break;
-    case "event":
-      switch (yVar.semantics) {
-        case "user":
-          $("#output").html(" vertical-bar histogram of num events per user");
-          // name of field counting events is numEvents
-          var hist = histogramify(userData, {varId: "numEvents", count: "users"});
-          barplot(hist, {bars: "vertical"});
-        break;
-      case "per_user":
-        if (yVar.datatype == "factor") {
-          $("#output").html(" Bar chart - y-axis is the user-level factors, x-axis is number of events");
-          var counts = countFactors(userData, {varId: yVar.id, count: "events", colorVar: colorVar});
-          barplot(counts, {bars: "horizontal"});
-        } else {
-          $("#output").html(" Histogram - bucket continuous variable, x-axis is number of events");
-          var hist = histogramify(userData, {varId: yVar.id, count: "events"});
-          barplot(hist, {bars: "horizontal"});
-        }
-        break;
-      case "event":
-        return; // invalid!
-        break;
-      case "per_event":
-        if (yVar.datatype == "factor") {
-          $("#output").html(" horizontal bar chart, num events in each per-event factor group");
-          var counts = countFactors(userData, {varId: yVar.id, count: "events",
-                             varPerEvent: true, colorVar: colorVar});
-          barplot(counts, { bars: "horizontal"});
-        } else {
-          $("#output").html(" horizontal histogram using arbitrary buckets for continuous variable on y");
-          var hist = histogramify(userData, {varId: yVar.id, count: "events",
-                                             varPerEvent: true});
-          barplot(hist, {bars: "horizontal"});
-        }
-        break;
-      }
-
-      break;
-    case "per_event":
-      switch (yVar.semantics) {
-      case "user":
-        $("#output").html("TODO THIS IS THE HARD ONE!!");
-        // need to aggregate the per-event variable for each user -- e.g.
-        // producing the 'average event value' per user and plotting that.
-        break;
-      case "per_user":
-        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, dotType: "event", colorVar: colorVar});
-        break;
-      case "event":
-        if (xVar.datatype == "factor") {
-          $("#output").html(" vertical bar chart, num events in each per-event factor group");
-          var counts = countFactors(userData, {varId: xVar.id, count: "events",
-                                               varPerEvent: true, colorVar: colorVar});
-          barplot(counts, { bars: "vertical"});
-        } else {
-          $("#output").html(" vertical histogram using arbitrary buckets for continuous variable on x");
-          $("#the-graph-image").attr("src", "img/histogram.png");
-          var hist = histogramify(userData,  {varId: xVar.id, count: "events",
-                                              varPerEvent: true});
-          barplot(hist, {bars: "vertical"});
-        }
-        break;
-      case "per_event":
-        scatterplot(userData, xVar, yVar, {xIsPerEvent: true, yIsPerEvent: true, dotType: "event", colorVar: colorVar});
-        break;
-      }
-      break;
+    // Decide what type of graph to draw
+    if ( xVar.semantics == "user" && yVar.semantics == "user") {
+      // Invalid!
+      return;
     }
+
+    if ( xVar.semantics == "user") {   // and yVar isn't
+      someKindOfBarPlot( userData, {variable: yVar, counter: xVar, colorVar: colorVar,
+                                    bars: "horizontal"});
+      return;
+    }
+
+    if ( yVar.semantics == "user") {
+      someKindOfBarPlot( userData, {variable: xVar, counter: yVar, colorVar: colorVar,
+                                    bars: "vertical"});
+      return;
+    }
+
+    // TODO the other special case is event_name vs. event_count
+    scatterplot(userData, xVar, yVar, {colorVar: colorVar});
   }
 
   function detectBadAssignment(variable, role, params) {
@@ -194,8 +95,13 @@ function initDragGui(variables, userData){
       if (otherAxis) {
         var otherAxisVar = getVarById(otherAxis);
         if ((otherAxisVar.semantics == "user" && variable.semantics == "user") ||
-          (otherAxisVar.semantics == "event" && variable.semantics == "event")){
-          return "I can't plot the same variable on both axes!";
+          (otherAxisVar.semantics == "event_count" && variable.semantics == "event_count") ||
+          (otherAxisVar.semantics == "event_name" && variable.semantics == "event_name"){
+            return "Sorry, I don't know any meaningful way to plot those variables together.";
+        }
+        if (variable.semantics == "event_name" && otherAxisVar.semantics == "per_user" ||
+            variable.semantics == "per_user" && otherAxisVar.semantics == "event_name") {
+          return "Sorry, I don't know any meaningful way to plot those variables together.";
         }
       }
     }

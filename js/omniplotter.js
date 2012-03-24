@@ -74,39 +74,15 @@ function scatterplot(userData, xVar, yVar, options) {
     return newY;
   }
 
-  // This is close to, but not exactly the same as, traverseData
-  // because each point will have an x and a y...
   for (var i = 0; i < userData.length; i++) {
-    var newX, newY, numEvents, newColor = null;
-    if (!options.xIsPerEvent) {
-      newX = getXVarVal(userData[i]);
-    }
-    if (!options.yIsPerEvent) {
-      newY = getYVarVal(userData[i]);
-    }
-    // Assume color is always factor-type and per-user.
-    // TODO: color could be an event property sometimes?
+    var newX, newY, newColor = null;
+    newX = getXVarVal(userData[i]);
+    newY = getYVarVal(userData[i]);
     if (options.colorVar) {
+      // color is always factor-type and per-user.
       newColor = userData[i][ options.colorVar.id ];
     }
-    if (options.dotType == "user") {
-      dataPoints.push( {x: newX, y: newY, c: newColor} );
-    }
-    else {
-      numEvents = userData[i].events.length;
-      if (numEvents < 200) {
-        // Guard against mega-users because otherwise this triggers "unresponsive script"
-        for (var j = 0; j < numEvents; j++) {
-          if (options.xIsPerEvent) {
-            newX = getXVarVal(userData[i].events[j]);
-          }
-          if (options.yIsPerEvent) {
-            newY = getYVarVal(userData[i].events[j]);
-          }
-          dataPoints.push({x: newX, y: newY, c: newColor});
-        }
-      }
-    }
+    dataPoints.push( {x: newX, y: newY, c: newColor} );
   }
 
   var xScale, yScale;
@@ -222,25 +198,9 @@ function scatterplot(userData, xVar, yVar, options) {
     .attr("cy", yMapper);
 }
 
-function traverseData(userData, options, callback) {
-  for (var i = 0; i < userData.length; i++) {
-    var val;
-    if (!options.varPerEvent) {   // expect factorId to match a field on the user
-      val = userData[i][ options.varId ];
-    }
-    if (options.count == "users") { // count users with each value of the factor
-      callback(val);
-    } else if (options.count == "events") { // count events
-      for (var j = 0; j < userData[i].events.length; j++) {
-        if (options.varPerEvent) {
-          val = userData[i].events[j][ options.varId ]; // expect factorId to match field on event
-        }
-        callback(val);
-      }
-    }
-  }
 
-}
+// Different ways of counting up users for a bar chart:
+
 
 function countFactors(userData, options) {
   var factorValueCounts = {};  // will be key = factor name, value = count
@@ -256,26 +216,44 @@ function countFactors(userData, options) {
     addCount( userData[i][ options.varId ]);
   }
 
+  return toCountsAndLabels(factorValueCounts);
+}
+
+function toCountsAndLabels(dictionary) {
+  // takes a dictionary like {a: 5, b: 7} and turns it into
+  // two arrays like {counts: [5, 7], labels: ["a", "b"]}
   var counts = [];
   var labels = [];
-  for (var val in factorValueCounts) {
+  for (var val in dictionary) {
     labels.push(val);
-    counts.push(factorValueCounts[val]);
+    counts.push(dictionary[val]);
   }
   return {counts: counts, labels: labels};
 }
 
-/* customizations:
- *
- * menu bar hidden
- * menu bar shown
- * tabs on top
- * tabs on bottom
- * bookmark bar hidden
- * bookmark bar shown
- * status bar shown
- * status bar hidden
- */
+function whoDidAtLeastOnce(userData, options) {
+  // for each event, count users who did that event at least once
+  var eventCounts = {};
+  for (var i =0; i < userData.length; i++) {
+    var user = userData[i];
+    for (var prop in user) {
+      if (prop.indexOf("numEvents_item") > -1) {
+        var eventName = prop.split("=")[1];
+        var numEvents = parseInt(user[prop]);
+
+        if (numEvents > 0) {
+          if (eventCounts[eventName]) {
+            eventCounts[eventName] += 1;
+          } else {
+            eventCounts[eventName] = 1;
+          }
+        }
+      }
+    }
+  }
+
+  return toCountsAndLabels(eventCounts);
+}
 
 function histogramify(userData, options) {
   var labels = [];
@@ -311,19 +289,20 @@ function histogramify(userData, options) {
     var name = (min + j * bucketWidth).toFixed(1) + " - " + (min + (j+1) * bucketWidth).toFixed(1);
     console.log(name);
     labels.push(name);
-    bucketCounts.push(0);
+      bucketCounts.push(0);
   }
   breakpoints.push(max);
 
   // go through a second time, create bucket counts
-  traverseData(userData, options, function(val) {
+  for (var i = 0; i < userData.length; i++) {
+    var val = userData[i][ options.varId ];
     for (var j = 0; j < numBuckets; j++) {
       if (val < (min + (j+1) * bucketWidth) ) {
         bucketCounts[j] ++;
-        return;
+        break;
       }
     }
-  });
+  }
 
   return {counts: bucketCounts, labels: labels};
 }
