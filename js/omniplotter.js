@@ -12,6 +12,12 @@
  */
 
 
+// TODO: colors for bar chart; better labels;
+// latticing;
+// the special case of UI item vs. event count
+// Add option of "particular event count" as a special user-level variable
+// Heatmapper page
+
 
 /* To do latticing:
  * 1. factor out the part that decides on the width and height of the svg rectangle
@@ -59,6 +65,9 @@ function scatterplot(userData, xVar, yVar, options) {
   var dataPoints = [];
 
   function getXVarVal(record) {
+    if (xVar.semantics == "event_count") {
+      return parseInt(record["numEvents"]);
+    }
     var newX = record[ xVar.id ];
     if (xVar.datatype != "factor") {
       newX = parseFloat(newX);
@@ -67,6 +76,9 @@ function scatterplot(userData, xVar, yVar, options) {
   }
 
   function getYVarVal(record) {
+    if (yVar.semantics == "event_count") {
+      return parseInt(record["numEvents"]);
+    }
     var newY = record[ yVar.id ];
     if (yVar.datatype != "factor") {
       newY = parseFloat(newY);
@@ -252,6 +264,33 @@ function whoDidAtLeastOnce(userData, options) {
     }
   }
 
+  return toCountsAndLabels(eventCounts);
+}
+
+function totalEventsByItem(userData) {
+  // TODO Duplicates a bunch of code from whoDidAtLeastOnce...
+  var eventCounts = {};
+  for (var i=0; i < userData.length; i++) {
+    var user = userData[i];
+    for (var prop in user) {
+      // TODO is indexOf way slow when run on every prop of every user?
+      // if so we could pull out all the relevant property names as metadata
+      // when generating the JSON file...
+      // which, check this out, we need to do that ANYWAY in order to offer those
+      // as variable choices...
+      if (prop.indexOf("numEvents_item") > -1) {
+        var eventName = prop.split("=")[1];
+        var numEvents = parseInt(user[prop]);
+        if (numEvents > 0) {
+          if (eventCounts[eventName]) {
+            eventCounts[eventName] += numEvents; // Only this line...
+          } else {
+            eventCounts[eventName] = numEvents; // And this line are different...
+          }
+        }
+      }
+    }
+  }
   return toCountsAndLabels(eventCounts);
 }
 

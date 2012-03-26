@@ -24,15 +24,24 @@ function initDragGui(variables, userData){
     // OK height of bars will be number of users, but what exactly are we counting here?
     console.log("Some kind of bar plot: datatype is " + options.variable.datatype + " semantics is " + options.variable.semantics);
     if (options.variable.semantics == "event_count") {
+      $("#output").html("Bars represent the number of users with a total number of actions in the given range.");
       counts = histogramify(userData, {varId: "numEvents", colorVar: options.colorVar});
     } else if (options.variable.semantics == "event_name") {
-      $("#output").html("Bars represent the number of users who clicked the item at least once.");
+      $("#output").html("Bars represent the number of users who clicked the given item at least once.");
       counts = whoDidAtLeastOnce(userData, {colorVar: options.colorVar});
     } else if (options.variable.datatype == "factor") {
+      $("#output").html("Bars represent the number of users with the given " + options.variable.name);
       counts = countFactors(userData, {varId: options.variable.id, colorVar: options.colorVar});
     } else {
+      $("#output").html("Bars represent the number of users with a " + options.variable.name + " in the given range.");
       counts = histogramify(userData, {varId: options.variable.id, colorVar: options.colorVar});
     }
+    barplot(counts, {bars: options.bars});
+  }
+
+  function eventCountPlot(userData, options) {
+    var counts = totalEventsByItem(userData);
+    $("#output").html("Bars represent number of uses, totalled across all users, for the given item.");
     barplot(counts, {bars: options.bars});
   }
 
@@ -64,7 +73,22 @@ function initDragGui(variables, userData){
       return;
     }
 
-    // TODO the other special case is event_name vs. event_count
+    // Special case: event_name vs. event_count = plot counts of each event
+    // TODO actually more useful as scatter plot where each dot is a user and one axis
+    // is number of events that user had in that category?
+    if ( yVar.semantics == "event_name" && xVar.semantics == "event_count") {
+      eventCountPlot(userData, {bars: "horizontal"});
+      return;
+    }
+    if ( xVar.semantics == "event_name" && yVar.semantics == "event_count") {
+      eventCountPlot(userData, {bars: "vertical"});
+      return;
+    }
+
+    // TODO not implemented yet - percentage of users is treated same as number of users
+
+    // All other cases use scatterplot.
+    // TODO every category-based scatter plot needs a violin-plot option...
     scatterplot(userData, xVar, yVar, {colorVar: colorVar});
   }
 
@@ -96,7 +120,7 @@ function initDragGui(variables, userData){
         var otherAxisVar = getVarById(otherAxis);
         if ((otherAxisVar.semantics == "user" && variable.semantics == "user") ||
           (otherAxisVar.semantics == "event_count" && variable.semantics == "event_count") ||
-          (otherAxisVar.semantics == "event_name" && variable.semantics == "event_name"){
+          (otherAxisVar.semantics == "event_name" && variable.semantics == "event_name")) {
             return "Sorry, I don't know any meaningful way to plot those variables together.";
         }
         if (variable.semantics == "event_name" && otherAxisVar.semantics == "per_user" ||
