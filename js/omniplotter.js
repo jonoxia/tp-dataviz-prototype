@@ -12,10 +12,10 @@
  */
 
 
-// TODO: colors for bar chart; better labels;
+// TODO: colors for bar chart;
 // latticing;
-// the special case of UI item vs. event count
 // Add option of "particular event count" as a special user-level variable
+// Additional options such as logarithmic scale, regression line, or violin-plot
 // Heatmapper page
 
 
@@ -35,6 +35,22 @@
  *
  */
 
+function makeChart() {
+  var margin = 40;
+
+  var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
+  var chartHeight = 600 - 2 * margin; // or somethin?
+
+  var chart = d3.select("#imagearea").append("svg:svg")
+    .attr("width", chartWidth + 2 * margin)
+    .attr("height", chartHeight + 2 * margin)
+    .attr("class", "chart")
+    .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
+
+  return {chart: chart, chartWidth: chartWidth, chartHeight: chartHeight};
+}
+
+
 // ui item, number of extensions
 function scatterplot(userData, xVar, yVar, options) {
   // If x and y variables are both user/per user, dots in scatterplot are users.
@@ -50,17 +66,7 @@ function scatterplot(userData, xVar, yVar, options) {
   // TODO the width/height/create container/create chart stuff is duplicated in barplot...
   // choose timestamp vs. num extensions (yeah i know that's silly) to test this out.
 
-  var margin = 40;
-
-  var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
-  var chartHeight = 600 - 2 * margin; // or somethin?
-
-  var chart = d3.select("#imagearea").append("svg:svg")
-    .attr("width", chartWidth + 2 * margin)
-    .attr("height", chartHeight + 2 * margin)
-    .attr("class", "chart")
-    .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
-
+  var {chart, chartWidth, chartHeight} = makeChart();
 
   var dataPoints = [];
 
@@ -356,16 +362,7 @@ function barplot(data, options) {
   // most -> least, least -> most, or alphabetical by factor?
   var horizBars = (options.bars == "horizontal");
 
-  var margin = 40;
-
-  var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
-  var chartHeight = 600 - 2 * margin; // or somethin?
-
-  var chart = d3.select("#imagearea").append("svg:svg")
-    .attr("width", chartWidth + 2 * margin)
-    .attr("height", chartHeight + 2 * margin)
-    .attr("class", "chart")
-    .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
+  var {chart, chartWidth, chartHeight} = makeChart();
 
   // TODO should be able to choose linear or logarithmic scale
   var barLength = d3.scale.linear()
