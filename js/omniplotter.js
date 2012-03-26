@@ -354,41 +354,83 @@ function barplot(data, options) {
   var labelsForD3 = data.labels;
   // TODO sort dataForD3 into an order that we like - make sort-order a drop-down or something
   // most -> least, least -> most, or alphabetical by factor?
-
-  var containerWidth = parseInt(d3.select("#imagearea").style("width").replace("px", ""));
-  var containerHeight = 600; // or somethin?
-  var leftMargin = 50;
-  var bottomMargin = 50; // or something?
-  var chartWidth = containerWidth - leftMargin;
-  var chartHeight = containerHeight - bottomMargin;
   var horizBars = (options.bars == "horizontal");
 
-  var container = d3.select("#imagearea").append("svg:svg")
-    .attr("width", containerWidth)
-    .attr("height", containerHeight);
+  var margin = 40;
 
-  // Flip the y-axis so 0,0 is at the bottom left and increasing y goes up
-  var chart = container.append("svg:g")
+  var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
+  var chartHeight = 600 - 2 * margin; // or somethin?
+
+  var chart = d3.select("#imagearea").append("svg:svg")
+    .attr("width", chartWidth + 2 * margin)
+    .attr("height", chartHeight + 2 * margin)
     .attr("class", "chart")
-    .attr("transform", "translate(" + leftMargin + "," + (chartHeight) + ")scale(1,-1)");
+    .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
 
   // TODO should be able to choose linear or logarithmic scale
   var barLength = d3.scale.linear()
-    .domain([0, d3.max(dataForD3)])
-    .range([0, (horizBars? chartWidth : chartHeight)]);
+    .domain([0, d3.max(dataForD3)]);
+  if (horizBars) {
+    barLength.range([0, chartWidth]);
+  } else {
+    // vertical bars come up from the bottom, not down from the top
+    barLength.range([chartHeight, 0]);
+  }
 
-  var barWidth = (horizBars? chartHeight : chartWidth) / dataForD3.length;
-  // could use d3.scale.ordinal() for this but it's trivial to calculate it
+  // Draw a numerical axis. TODO Mark with % if options.axisIsPercent.
+  var barLengthAxis = d3.svg.axis()
+    .scale(barLength)
+    .ticks(10)
+    .tickSize(6, 3, 0);
+  if (!horizBars) {
+    barLengthAxis.orient("right");
+  }
 
-  chart.selectAll("rect")
+  // Ordinal scale:
+  var barWidth = d3.scale.ordinal()
+    .domain(labelsForD3)
+    .rangeBands([0, (horizBars? chartHeight: chartWidth)]);
+  var barWidthAxis = d3.svg.axis()
+    .scale(barWidth)
+    .ticks(10)
+    .tickSize(6, 3, 0);
+  if (horizBars) {
+    barWidthAxis.orient("right");
+  }
+
+  var xAxis = chart.append("svg:g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0, " + chartHeight + ")");
+  var yAxis = chart.append("svg:g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(" + chartWidth + ",0)");
+
+  if (horizBars) {
+      xAxis.call(barLengthAxis);
+      yAxis.call(barWidthAxis);
+  } else {
+      xAxis.call(barWidthAxis);
+      yAxis.call(barLengthAxis);
+  }
+
+  // Draw the bars:
+  var bars = chart.selectAll("rect")
     .data(dataForD3)
-  .enter().append("svg:rect")
-    .attr((horizBars? "y": "x"), function(d, i) { return i * barWidth; })
-    .attr((horizBars? "width": "height"), barLength)
-    .attr((horizBars? "height": "width"), barWidth);
+    .enter().append("svg:rect");
+
+  if (horizBars) {
+    bars.attr("y", function(d, i) { return i * barWidth.rangeBand(); })
+      .attr("width", barLength)
+      .attr("height", barWidth.rangeBand());
+  } else {
+    bars.attr("x", function(d, i) { return i * barWidth.rangeBand(); })
+      .attr("y", barLength)
+      .attr("width", barWidth.rangeBand())
+      .attr("height", function(d) { return chartHeight - barLength(d); });
+  }
 
   // Text goes outside the chart so as not to be upside-down
-  var texties = container.selectAll("text")
+  /*var texties = container.selectAll("text")
    .data(dataForD3)
  .enter().append("svg:text")
    .attr("dx", -3) // padding-right
@@ -400,13 +442,14 @@ function barplot(data, options) {
     texties.attr("x", leftMargin)
       .attr("y", function(d, i) {return chartHeight - (i * barWidth + barWidth/2);});
   } else {
-    // ROTATE
+    // ROTATE LABELS
     texties.attr("x", function(d, i) {return i * barWidth + barWidth/2 + leftMargin;})
       .attr("y", chartHeight)
       .attr("transform", function(d, i) {
               return "rotate( -45 " + (i * barWidth + barWidth/2 + leftMargin) + "," + chartHeight + ")";
             });
   }
+  */
 
 }
 

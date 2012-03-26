@@ -21,22 +21,43 @@ function initDragGui(variables, userData){
 
   function someKindOfBarPlot(userData, options) {
     var counts;
+    var usePercents;
+    if (options.counter.id == "pct_users") {
+      usePercents = true;
+    } else {
+      usePercents = false;
+    }
+
+    var countStr = usePercents ? "percentage" : "number";
+
     // OK height of bars will be number of users, but what exactly are we counting here?
-    console.log("Some kind of bar plot: datatype is " + options.variable.datatype + " semantics is " + options.variable.semantics);
     if (options.variable.semantics == "event_count") {
-      $("#output").html("Bars represent the number of users with a total number of actions in the given range.");
+      $("#output").html("Bars represent the " +
+                        countStr + " of users with a total number of actions in the given range.");
       counts = histogramify(userData, {varId: "numEvents", colorVar: options.colorVar});
     } else if (options.variable.semantics == "event_name") {
-      $("#output").html("Bars represent the number of users who clicked the given item at least once.");
+      $("#output").html("Bars represent the " +
+                        countStr + " of users who clicked the given item at least once.");
       counts = whoDidAtLeastOnce(userData, {colorVar: options.colorVar});
     } else if (options.variable.datatype == "factor") {
-      $("#output").html("Bars represent the number of users with the given " + options.variable.name);
+      $("#output").html("Bars represent the " +
+                        countStr + " of users with the given " + options.variable.name);
       counts = countFactors(userData, {varId: options.variable.id, colorVar: options.colorVar});
     } else {
-      $("#output").html("Bars represent the number of users with a " + options.variable.name + " in the given range.");
+      $("#output").html("Bars represent the " +
+                        countStr + " of users with a " + options.variable.name + " in the given range.");
       counts = histogramify(userData, {varId: options.variable.id, colorVar: options.colorVar});
     }
-    barplot(counts, {bars: options.bars});
+
+    if (usePercents) {
+      // divide each count by number of users
+      var numUsers = userData.length;
+      for (var i = 0; i < counts.counts.length; i++) {
+        counts.counts[i] = counts.counts[i] / numUsers; // TODO ensure float division!
+      }
+    }
+
+    barplot(counts, {bars: options.bars, axisIsPercent: usePercents});
   }
 
   function eventCountPlot(userData, options) {
@@ -84,8 +105,6 @@ function initDragGui(variables, userData){
       eventCountPlot(userData, {bars: "vertical"});
       return;
     }
-
-    // TODO not implemented yet - percentage of users is treated same as number of users
 
     // All other cases use scatterplot.
     // TODO every category-based scatter plot needs a violin-plot option...
