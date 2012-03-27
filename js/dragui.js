@@ -8,7 +8,23 @@ function updateFragment(params) {
   window.location = baseLoc + "#" + args.join("&");
 }
 
-function initDragGui(variables, userData){
+function readUrlParams() {
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+
+  var assignments = {};
+
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split("=");
+    var key = pair[0];
+    var value = unescape(pair[1]);
+    assignments[key] = value;
+  }
+
+  return assignments;
+}
+
+function initDragGui(variables, userData, initialAssignments){
 
   function getVarById(varId) {
     for(var x = 0; x < variables.length; x++) {
@@ -62,9 +78,9 @@ function initDragGui(variables, userData){
   }
 
   function eventCountPlot(userData, options) {
-    var counts = totalEventsByItem(userData);
+    var counts = totalEventsByItem(userData, {colorVar: options.colorVar});
     $("#output").html("Bars represent number of uses, totalled across all users, for the given item.");
-    barplot(counts, {bars: options.bars, caption: options.caption});
+    barplot(counts, {bars: options.bars, caption: options.caption, width: options.width, height: options.height});
   }
 
   function drawNewGraph(params) {
@@ -108,14 +124,14 @@ function initDragGui(variables, userData){
       if ( xVar.semantics == "user") {   // and yVar isn't
          someKindOfBarPlot( dataSets[dataSetName],
                             {variable: yVar, counter: xVar, colorVar: colorVar, bars: "horizontal",
-                             caption: latticeLabel, width: chartWidth, height: chartWidth});
+                             caption: latticeLabel, width: chartWidth, height: chartHeight});
         continue;
       }
 
       if ( yVar.semantics == "user") {
         someKindOfBarPlot( dataSets[dataSetName],
                            {variable: xVar, counter: yVar, colorVar: colorVar, bars: "vertical",
-                            caption: latticeLabel, width: chartWidth, height: chartWidth});
+                            caption: latticeLabel, width: chartWidth, height: chartHeight});
         continue;
       }
 
@@ -124,12 +140,12 @@ function initDragGui(variables, userData){
       // is number of events that user had in that category?
       if ( yVar.semantics == "event_name" && xVar.semantics == "event_count") {
         eventCountPlot(dataSets[dataSetName], {bars: "horizontal", caption: latticeLabel,
-                                               width: chartWidth, height: chartWidth});
+                                               width: chartWidth, height: chartHeight, colorVar: colorVar});
         continue;
       }
       if ( xVar.semantics == "event_name" && yVar.semantics == "event_count") {
         eventCountPlot(dataSets[dataSetName], {bars: "vertical", caption: latticeLabel,
-                                               width: chartWidth, height: chartWidth});
+                                               width: chartWidth, height: chartHeight, colorVar: colorVar});
         continue;
       }
 
@@ -234,6 +250,14 @@ function initDragGui(variables, userData){
       }
     }
   });
+
+  // TODO right here: apply initialAssignments
+  for (var key in initialAssignments) {
+    // TODO need to manually do the thing that jquery UI draggable was doing for us
+    // TODO maybe refactor out some of the stuff above into an "assign var" function,
+    // use that here.
+    console.log(key + " is " + initialAssignments[key]);
+  }
 }
 
 // TODO should be able to drag a variable from its placement after it has been placed.

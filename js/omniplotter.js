@@ -13,19 +13,21 @@
 
 
 // TODO:
+// Make page apply parameters from URL when first loaded!
+// Heatmapper page
+//
 // Latticing: share axes between lattice charts!!  And allow a second lattice variable choice...
-// Bar chart with percent axis and colors: should it show percentage of all users or percentage
-// of same-color users?
+// Bar chart with percent axis and colors: currently showing percentage of all users, but should
+// it show percentage of same-color users?
 // When latticing and coloring: there's currently no guarantee the same color means the same thing
-// across all subcharts...
+// across all subcharts... this is related to sharing of axes; generate color list and axes min/max
+// outside of the lattice loop.
 // Add option of "particular event count" as a special user-level variable
 // Additional options such as logarithmic scale, regression line, or violin-plot
-// Heatmapper page
 // Make share button do something
-// Make page apply parameters from URL when first loaded!
-// Un-break the other types of bar charts: make them color-split too
 // When coloring, generate key for what each color means.
 // Add ability to *remove* a variable assignment!
+
 
 /* To do latticing:
  * 1. factor out the part that decides on the width and height of the svg rectangle
@@ -300,7 +302,7 @@ function doForEachUser(userData, options) {
         if (prop.indexOf("numEvents_item") > -1) {
           var eventName = prop.split("=")[1];
           var numEvents = parseInt(user[prop]);
-          eventCountCallback(eventName, numEvents, color);
+          options.eventCountCallback(eventName, numEvents, color);
         }
       }
     }
@@ -347,7 +349,7 @@ function whoDidAtLeastOnce(userData, options) {
   return toCountsAndLabels(eventCounts);
 }
 
-function totalEventsByItem(userData) {
+function totalEventsByItem(userData, options) {
   var eventCounts = {};
   doForEachUser(userData, { eventCountCallback: function(eventName, numEvents, color) {
                               if (!eventCounts[color]) {
