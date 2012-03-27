@@ -53,62 +53,92 @@ function initDragGui(variables, userData){
       // divide each count by number of users
       var numUsers = userData.length;
       for (var i = 0; i < counts.counts.length; i++) {
-        counts.counts[i] = counts.counts[i] / numUsers; // TODO ensure float division!
+        counts.counts[i] = counts.counts[i] / numUsers;
       }
     }
 
-    barplot(counts, {bars: options.bars, axisIsPercent: usePercents});
+    barplot(counts, {bars: options.bars, axisIsPercent: usePercents, caption: options.caption,
+                     width: options.width, height: options.height});
   }
 
   function eventCountPlot(userData, options) {
     var counts = totalEventsByItem(userData);
     $("#output").html("Bars represent number of uses, totalled across all users, for the given item.");
-    barplot(counts, {bars: options.bars});
+    barplot(counts, {bars: options.bars, caption: options.caption});
   }
 
   function drawNewGraph(params) {
     var xVar = getVarById(params["x-axis"]);
     var yVar = getVarById(params["y-axis"]);
 
-    // TODO: Lattice-wrap not yet implemented.
     var colorVar = null;
     if (params["color"]) {
       colorVar = getVarById(params["color"]);
     }
 
+    var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", ""));
+    var chartHeight = 600; // TODO totally arbitrary number
+
+    var dataSets, latticeVar, dataSetName;
+    if (params["lattice-x"]) {
+      latticeVar = getVarById(params["lattice-x"]);
+      dataSets = latticificate(userData, latticeVar);
+      // if we're latticed then make smaller charts
+      chartWidth = chartWidth * 0.4;
+      chartHeight = chartHeight * 0.4; // TODO totally arbitrary number
+    } else {
+      // Just make one lattice dataset containing all data.
+      latticeVar = null;
+      dataSets = {everybody: userData};
+    }
+
     // Decide what type of graph to draw
     if ( xVar.semantics == "user" && yVar.semantics == "user") {
-      // Invalid!
+      // Invalid!  This should never happen since it should be caught by detectBadAssignment
       return;
     }
 
-    if ( xVar.semantics == "user") {   // and yVar isn't
-      someKindOfBarPlot( userData, {variable: yVar, counter: xVar, colorVar: colorVar,
-                                    bars: "horizontal"});
-      return;
-    }
+    // Plot each data set in its own lattice mini-graph:
+    for (dataSetName in dataSets) {
+      var latticeLabel = "";
+      if (latticeVar) {
+        latticeLabel = latticeVar.name + " = " + dataSetName;
+      }
 
-    if ( yVar.semantics == "user") {
-      someKindOfBarPlot( userData, {variable: xVar, counter: yVar, colorVar: colorVar,
-                                    bars: "vertical"});
-      return;
-    }
+      if ( xVar.semantics == "user") {   // and yVar isn't
+         someKindOfBarPlot( dataSets[dataSetName],
+                            {variable: yVar, counter: xVar, colorVar: colorVar, bars: "horizontal",
+                             caption: latticeLabel, width: chartWidth, height: chartWidth});
+        continue;
+      }
 
-    // Special case: event_name vs. event_count = plot counts of each event
-    // TODO actually more useful as scatter plot where each dot is a user and one axis
-    // is number of events that user had in that category?
-    if ( yVar.semantics == "event_name" && xVar.semantics == "event_count") {
-      eventCountPlot(userData, {bars: "horizontal"});
-      return;
-    }
-    if ( xVar.semantics == "event_name" && yVar.semantics == "event_count") {
-      eventCountPlot(userData, {bars: "vertical"});
-      return;
-    }
+      if ( yVar.semantics == "user") {
+        someKindOfBarPlot( dataSets[dataSetName],
+                           {variable: xVar, counter: yVar, colorVar: colorVar, bars: "vertical",
+                            caption: latticeLabel, width: chartWidth, height: chartWidth});
+        continue;
+      }
 
-    // All other cases use scatterplot.
-    // TODO every category-based scatter plot needs a violin-plot option...
-    scatterplot(userData, xVar, yVar, {colorVar: colorVar});
+      // Special case: event_name vs. event_count = plot counts of each event
+      // TODO actually more useful as scatter plot where each dot is a user and one axis
+      // is number of events that user had in that category?
+      if ( yVar.semantics == "event_name" && xVar.semantics == "event_count") {
+        eventCountPlot(dataSets[dataSetName], {bars: "horizontal", caption: latticeLabel,
+                                               width: chartWidth, height: chartWidth});
+        continue;
+      }
+      if ( xVar.semantics == "event_name" && yVar.semantics == "event_count") {
+        eventCountPlot(dataSets[dataSetName], {bars: "vertical", caption: latticeLabel,
+                                               width: chartWidth, height: chartWidth});
+        continue;
+      }
+
+      // All other cases use scatterplot.
+      // TODO every category-based scatter plot needs a violin-plot option; number vs. number
+      // scatter plot needs a regression line option.
+      scatterplot(dataSets[dataSetName], xVar, yVar, {colorVar: colorVar, caption: latticeLabel,
+                                                      width: chartWidth, height: chartWidth});
+    }
   }
 
   function detectBadAssignment(variable, role, params) {

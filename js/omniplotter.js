@@ -12,8 +12,8 @@
  */
 
 
-// TODO: colors for bar chart;
-// latticing;
+// TODO: colors for bar chart!
+// Latticing: share axes between lattice charts!!  And allow a second lattice variable choice...
 // Add option of "particular event count" as a special user-level variable
 // Additional options such as logarithmic scale, regression line, or violin-plot
 // Heatmapper page
@@ -35,17 +35,42 @@
  *
  */
 
-function makeChart() {
+function latticificate(userData, latticeVar) {
+  var chunks = {};
+
+  for (var i = 0; i < userData.length; i++) {
+    var user = userData[i];
+    var value = user[ latticeVar.id ];
+
+    if (!chunks[value]) {
+      chunks[value] = [];
+    }
+
+    chunks[value].push(user);
+  }
+
+  return chunks;
+}
+
+
+function makeChart(options) {
   var margin = 40;
 
-  var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", "")) - 2 * margin;
-  var chartHeight = 600 - 2 * margin; // or somethin?
+  var chartWidth = options.chartWidth - 2 * margin;
+  var chartHeight = options.chartHeight - 2 * margin;
 
   var chart = d3.select("#imagearea").append("svg:svg")
     .attr("width", chartWidth + 2 * margin)
     .attr("height", chartHeight + 2 * margin)
     .attr("class", "chart")
     .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
+
+  if (options.caption) {
+    chart.append("svg:text")
+      .attr("x", chartWidth/2 - 20)
+      .attr("y", 20)
+      .text(options.caption);
+  }
 
   return {chart: chart, chartWidth: chartWidth, chartHeight: chartHeight};
 }
@@ -66,7 +91,9 @@ function scatterplot(userData, xVar, yVar, options) {
   // TODO the width/height/create container/create chart stuff is duplicated in barplot...
   // choose timestamp vs. num extensions (yeah i know that's silly) to test this out.
 
-  var {chart, chartWidth, chartHeight} = makeChart();
+  var {chart, chartWidth, chartHeight} = makeChart({caption: options.caption,
+                                                    chartWidth: options.width,
+                                                    chartHeight: options.height});
 
   var dataPoints = [];
 
@@ -332,9 +359,8 @@ function histogramify(userData, options) {
     breakpoints.push( min +  j * bucketWidth);
     // control number of sig figs when float is written out
     var name = (min + j * bucketWidth).toFixed(1) + " - " + (min + (j+1) * bucketWidth).toFixed(1);
-    console.log(name);
     labels.push(name);
-      bucketCounts.push(0);
+    bucketCounts.push(0);
   }
   breakpoints.push(max);
 
@@ -362,7 +388,9 @@ function barplot(data, options) {
   // most -> least, least -> most, or alphabetical by factor?
   var horizBars = (options.bars == "horizontal");
 
-  var {chart, chartWidth, chartHeight} = makeChart();
+  var {chart, chartWidth, chartHeight} = makeChart({caption: options.caption,
+                                                    chartWidth: options.width,
+                                                    chartHeight: options.height});
 
   // TODO should be able to choose linear or logarithmic scale
   var barLength = d3.scale.linear()
