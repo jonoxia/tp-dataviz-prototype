@@ -85,7 +85,7 @@
     "url": "", 
     "id": "customize_status_bar", 
     "name": "Status bar setting", 
-    "description": "Did hte user have the status bar shown or hidden?"
+    "description": "Did the user have the status bar shown or hidden?"
   },
   {
     "datatype": "factor",
