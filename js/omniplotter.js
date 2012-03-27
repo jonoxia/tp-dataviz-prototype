@@ -12,12 +12,20 @@
  */
 
 
-// TODO: colors for bar chart!
+// TODO:
 // Latticing: share axes between lattice charts!!  And allow a second lattice variable choice...
+// Bar chart with percent axis and colors: should it show percentage of all users or percentage
+// of same-color users?
+// When latticing and coloring: there's currently no guarantee the same color means the same thing
+// across all subcharts...
 // Add option of "particular event count" as a special user-level variable
 // Additional options such as logarithmic scale, regression line, or violin-plot
 // Heatmapper page
-
+// Make share button do something
+// Make page apply parameters from URL when first loaded!
+// Un-break the other types of bar charts: make them color-split too
+// When coloring, generate key for what each color means.
+// Add ability to *remove* a variable assignment!
 
 /* To do latticing:
  * 1. factor out the part that decides on the width and height of the svg rectangle
@@ -76,20 +84,8 @@ function makeChart(options) {
 }
 
 
-// ui item, number of extensions
 function scatterplot(userData, xVar, yVar, options) {
-  // If x and y variables are both user/per user, dots in scatterplot are users.
-  // If at least one axis is event-level, though, dots have to be events.
-
-  // (Unless... if one axis is a continuous event-level variable, we could pick the average
-  // (or min or max) per user and use that value to plot a user-dot. How to represent that
-  // option?)
-  // (I guess a dropdown would appear: Dots represent
-  //     --> events (all users lumped together)
-  //     --> users (average value per user)
-
-  // TODO the width/height/create container/create chart stuff is duplicated in barplot...
-  // choose timestamp vs. num extensions (yeah i know that's silly) to test this out.
+  // Each dot in the scatter plot is a user.
 
   var {chart, chartWidth, chartHeight} = makeChart({caption: options.caption,
                                                     chartWidth: options.width,
@@ -246,90 +242,131 @@ function scatterplot(userData, xVar, yVar, options) {
 
 // Different ways of counting up users for a bar chart:
 
+function toCountsAndLabels(colorDictionary) {
+  // takes a dictionary like {a: 5, b: 7} and turns it into
+  // two arrays like {counts: [5, 7], labels: ["a", "b"]}
+  // Also combines the colors in the right order
 
-function countFactors(userData, options) {
-  var factorValueCounts = {};  // will be key = factor name, value = count
-  function addCount(val) { // helper function for counts dictionary
-    if (factorValueCounts[val]) {
-      factorValueCounts[val] += 1;
-    } else {
-      factorValueCounts[val] = 1;
+  var colors = [];
+  for (var color in colorDictionary) {
+    colors.push(color);
+  }
+
+  // to create labels, look at keys across all colors...
+  // my kingdom for Python's dict.keys() method
+  var labelDict = {};
+  for (color in colorDictionary) {
+    for (var key in colorDictionary[color]) {
+      labelDict[key] = 1;
     }
   }
 
-  for (var i = 0; i < userData.length; i++) {
-    addCount( userData[i][ options.varId ]);
-  }
-
-  return toCountsAndLabels(factorValueCounts);
-}
-
-function toCountsAndLabels(dictionary) {
-  // takes a dictionary like {a: 5, b: 7} and turns it into
-  // two arrays like {counts: [5, 7], labels: ["a", "b"]}
   var counts = [];
   var labels = [];
-  for (var val in dictionary) {
-    labels.push(val);
-    counts.push(dictionary[val]);
+  for (key in labelDict) {
+    labels.push(key);
+    for (var c in colors) {
+      color = colors[c];
+      if (colorDictionary[color][key]) {
+        counts.push(colorDictionary[color][key]);
+      } else {
+        counts.push(0);
+      }
+    }
   }
-  return {counts: counts, labels: labels};
+
+  return {counts: counts, labels: labels, colors: colors};
+}
+
+
+function doForEachUser(userData, options) {
+  //varId, varCallback, eventCountCallback) {
+
+  for (var i =0; i < userData.length; i++) {
+    var user = userData[i];
+
+    var color = "everybody";
+    if (options.colorVar) {
+      color = userData[i][ options.colorVar.id ];
+    }
+
+    if (options.varId) {
+      var value = userData[i][ options.varId ];
+      options.varCallback(value, color);
+    }
+
+    if (options.eventCountCallback) {
+      for (var prop in user) {
+        if (prop.indexOf("numEvents_item") > -1) {
+          var eventName = prop.split("=")[1];
+          var numEvents = parseInt(user[prop]);
+          eventCountCallback(eventName, numEvents, color);
+        }
+      }
+    }
+  }
+}
+
+function countFactors(userData, options) {
+  var factorValueCounts = {};  // will be key = factor name, value = count
+  function addCount(val, color) { // helper function for counts dictionary
+    if (!factorValueCounts[color]) {
+      factorValueCounts[color] = {};
+    }
+
+    if (factorValueCounts[color][val]) {
+      factorValueCounts[color][val] += 1;
+    } else {
+      factorValueCounts[color][val] = 1;
+    }
+  }
+
+  doForEachUser(userData, { varId: options.varId, varCallback: addCount, colorVar: options.colorVar});
+
+  return toCountsAndLabels(factorValueCounts);
 }
 
 function whoDidAtLeastOnce(userData, options) {
   // for each event, count users who did that event at least once
   var eventCounts = {};
-  for (var i =0; i < userData.length; i++) {
-    var user = userData[i];
-    for (var prop in user) {
-      if (prop.indexOf("numEvents_item") > -1) {
-        var eventName = prop.split("=")[1];
-        var numEvents = parseInt(user[prop]);
 
-        if (numEvents > 0) {
-          if (eventCounts[eventName]) {
-            eventCounts[eventName] += 1;
-          } else {
-            eventCounts[eventName] = 1;
-          }
-        }
-      }
-    }
-  }
+  doForEachUser(userData, { eventCountCallback: function(eventName, numEvents, color) {
+                                  if (!eventCounts[color]) {
+                                    eventCounts[color] = {};
+                                  }
+
+                                      if (numEvents > 0) {
+                                        if (eventCounts[color][eventName]) {
+                                          eventCounts[color][eventName] += 1;
+                                        } else {
+                                          eventCounts[color][eventName] = 1;
+                                        }
+                                      }
+                            }, colorVar: options.colorVar});
 
   return toCountsAndLabels(eventCounts);
 }
 
 function totalEventsByItem(userData) {
-  // TODO Duplicates a bunch of code from whoDidAtLeastOnce...
   var eventCounts = {};
-  for (var i=0; i < userData.length; i++) {
-    var user = userData[i];
-    for (var prop in user) {
-      // TODO is indexOf way slow when run on every prop of every user?
-      // if so we could pull out all the relevant property names as metadata
-      // when generating the JSON file...
-      // which, check this out, we need to do that ANYWAY in order to offer those
-      // as variable choices...
-      if (prop.indexOf("numEvents_item") > -1) {
-        var eventName = prop.split("=")[1];
-        var numEvents = parseInt(user[prop]);
-        if (numEvents > 0) {
-          if (eventCounts[eventName]) {
-            eventCounts[eventName] += numEvents; // Only this line...
-          } else {
-            eventCounts[eventName] = numEvents; // And this line are different...
-          }
-        }
-      }
-    }
-  }
+  doForEachUser(userData, { eventCountCallback: function(eventName, numEvents, color) {
+                              if (!eventCounts[color]) {
+                                eventCounts[color] = {};
+                              }
+
+                              if (eventCounts[color][eventName]) {
+                                eventCounts[color][eventName] += numEvents;
+                              } else {
+                                eventCounts[color][eventName] = numEvents;
+                              }
+        }, colorVar: options.colorVar});
+
   return toCountsAndLabels(eventCounts);
 }
 
 function histogramify(userData, options) {
   var labels = [];
-  var bucketCounts = [];
+  var colorBucketCounts = {};
   var min = null, max = null;
   var numBuckets = 15; // TODO make this customizable
 
@@ -360,22 +397,51 @@ function histogramify(userData, options) {
     // control number of sig figs when float is written out
     var name = (min + j * bucketWidth).toFixed(1) + " - " + (min + (j+1) * bucketWidth).toFixed(1);
     labels.push(name);
-    bucketCounts.push(0);
   }
   breakpoints.push(max);
 
   // go through a second time, create bucket counts
   for (var i = 0; i < userData.length; i++) {
     var val = userData[i][ options.varId ];
+    // All data will be in 'blah' if there is no colorVar
+    var color = "blah";
+    if (options.colorVar) {
+      color = userData[i][ options.colorVar.id ];
+    }
+    // If this is the first time we've seen this color, create new empty histogram
+    if (!colorBucketCounts[color]) {
+      colorBucketCounts[color] = [];
+      for (var j = 0; j < breakpoints.length - 1; j++) {
+        colorBucketCounts[color][j] = 0;
+      }
+    }
+    // do the actual bucketing of users:
     for (var j = 0; j < numBuckets; j++) {
       if (val < (min + (j+1) * bucketWidth) ) {
-        bucketCounts[j] ++;
+        colorBucketCounts[color][j] ++;
         break;
       }
     }
   }
 
-  return {counts: bucketCounts, labels: labels};
+   // how many colors are there?
+  var colors = [];
+  for (var prop in colorBucketCounts) {
+    colors.push(prop);
+  }
+  var numColors = colors.length;
+
+  // Combine all the colored bucket lists into one list, in an order like
+  // red bar 1, green bar 1, blue bar 1, red bar 2, green bar 2, blue bar 2, etc.
+  // that's what barplot will be accepting.
+  var combinedCounts = [];
+  for (var b = 0; b < numBuckets; b++) {
+    for (var c = 0; c < numColors; c++) {
+      combinedCounts.push( colorBucketCounts[colors[c]][b] );
+    }
+  }
+
+  return {counts: combinedCounts, labels: labels, colors: colors};
 }
 
 function barplot(data, options) {
@@ -384,6 +450,8 @@ function barplot(data, options) {
 
   var dataForD3 = data.counts;
   var labelsForD3 = data.labels;
+  var colors = data.colors; // TODO use this to generate legend showing what each color means.
+
   // TODO sort dataForD3 into an order that we like - make sort-order a drop-down or something
   // most -> least, least -> most, or alphabetical by factor?
   var horizBars = (options.bars == "horizontal");
@@ -443,15 +511,24 @@ function barplot(data, options) {
     .data(dataForD3)
     .enter().append("svg:rect");
 
+  var barPixels = barWidth.rangeBand() / colors.length;
+
+  function colorMap(d, i) {
+    var colorIndex = (i % colors.length) + 1;
+    return "dataset-" + colorIndex;
+  }
+
   if (horizBars) {
-    bars.attr("y", function(d, i) { return i * barWidth.rangeBand(); })
+    bars.attr("y", function(d, i) { return i * barPixels; })
       .attr("width", barLength)
-      .attr("height", barWidth.rangeBand());
+      .attr("height", barPixels)
+      .attr("class", colorMap);
   } else {
-    bars.attr("x", function(d, i) { return i * barWidth.rangeBand(); })
+    bars.attr("x", function(d, i) { return i * barPixels; })
       .attr("y", barLength)
-      .attr("width", barWidth.rangeBand())
-      .attr("height", function(d) { return chartHeight - barLength(d); });
+      .attr("width", barPixels)
+      .attr("height", function(d) { return chartHeight - barLength(d); })
+      .attr("class", colorMap);
   }
 
   // Text goes outside the chart so as not to be upside-down
