@@ -8,21 +8,6 @@ function updateFragment(params) {
   window.location = baseLoc + "#" + args.join("&");
 }
 
-function readUrlParams() {  // is this working?? or in use? I didn't see it, and we could just get rid of it
-  var query = window.location.search.substring(1);
-  var vars = query.split("&");
-  var assignments = {};
-
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split("=");
-    var key = pair[0];
-    var value = unescape(pair[1]);
-    assignments[key] = value;
-  }
-
-  return assignments;
-}
-
 function getUrlParams() {
 	var args = {}
 	var params = ("" + window.location).split("#")[1]
@@ -33,7 +18,14 @@ function getUrlParams() {
 	return args
 }
 
-function initDragGui(variables, userData, initialAssignments){
+function enoughValsForGraph(params) {
+  	if (params["x-axis"] && params["y-axis"]) {
+	  return true;
+	}
+	return false;
+}
+
+function initDragGui(variables, userData){
 
   function getVarById(varId) {
     for(var x = 0; x < variables.length; x++) {
@@ -207,11 +199,23 @@ function initDragGui(variables, userData, initialAssignments){
     return false;
   }
 
-
-
+  
   var params = {};
   var assignments = {};
 
+  initialVals = getUrlParams();
+  if (enoughValsForGraph(initialVals)) {
+	drawNewGraph(initialVals)
+	for (val in initialVals) {
+		$("#" + val + "-target").find(".valbox").html(getVarById(initialVals[val]).name);
+		var problem = detectBadAssignment(getVarById(initialVals[val]), val, initialVals);
+	      if (problem) {
+	        $("#output").html(problem);
+	        return;
+	      }
+	}
+  }
+  
   var items = $("#variables_menu").find("li");
   items.draggable({opacity: 0.7,
                    helper: "clone" });
@@ -221,9 +225,9 @@ function initDragGui(variables, userData, initialAssignments){
       var variableName = ui.draggable.html();
       var variableId = ui.draggable.attr("id").split("var_")[1];
       var variableRole = $(this).attr("id").split("-target")[0];
-
-      // check if type is ok for role assignment:
-      var problem = detectBadAssignment(getVarById(variableId), variableRole, params);
+	
+      // check if type is ok for role assignment:  
+	  var problem = detectBadAssignment(getVarById(variableId), variableRole, params);
       if (problem) {
         $("#output").html(problem);
         return;
@@ -244,7 +248,6 @@ function initDragGui(variables, userData, initialAssignments){
           params[oldRole] = null;
         }
       }
-
       $(this).find(".valbox").html(variableName);
       assignments[variableName] = variableRole;
       params[variableRole] = variableId;
@@ -252,21 +255,16 @@ function initDragGui(variables, userData, initialAssignments){
       updateFragment(params);
 
       // Draw a graph if at least x-axis and y-axis have been set.
-      if (params["x-axis"] && params["y-axis"]) {
+      if (enoughValsForGraph(params)) {
         $("#imagearea").empty(); // Clear out old graph, if any
         drawNewGraph(params);
       }
     }
   });
 
-  initialAssignments = getUrlParams()
-  drawNewGraph(initialAssignments)
-  for (var key in initialAssignments) {
     // TODO need to manually do the thing that jquery UI draggable was doing for us
     // TODO maybe refactor out some of the stuff above into an "assign var" function,
-    // use that here.
-    console.log(key + " is " + initialAssignments[key]);
-  }
+    // use that here.  
 }
 
 // TODO should be able to drag a variable from its placement after it has been placed.
