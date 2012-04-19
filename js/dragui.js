@@ -8,10 +8,9 @@ function updateFragment(params) {
   window.location = baseLoc + "#" + args.join("&");
 }
 
-function readUrlParams() {
+function readUrlParams() {  // is this working?? or in use? I didn't see it, and we could just get rid of it
   var query = window.location.search.substring(1);
   var vars = query.split("&");
-
   var assignments = {};
 
   for (var i = 0; i < vars.length; i++) {
@@ -22,6 +21,16 @@ function readUrlParams() {
   }
 
   return assignments;
+}
+
+function getUrlParams() {
+	var args = {}
+	var params = ("" + window.location).split("#")[1]
+	params_list = params.split("&")
+	for (var pair in params_list) {
+		args[params_list[pair].split("=")[0]] = params_list[pair].split("=")[1]
+	}
+	return args
 }
 
 function initDragGui(variables, userData, initialAssignments){
@@ -86,7 +95,6 @@ function initDragGui(variables, userData, initialAssignments){
   function drawNewGraph(params) {
     var xVar = getVarById(params["x-axis"]);
     var yVar = getVarById(params["y-axis"]);
-
     var colorVar = null;
     if (params["color"]) {
       colorVar = getVarById(params["color"]);
@@ -251,7 +259,8 @@ function initDragGui(variables, userData, initialAssignments){
     }
   });
 
-  // TODO right here: apply initialAssignments
+  initialAssignments = getUrlParams()
+  drawNewGraph(initialAssignments)
   for (var key in initialAssignments) {
     // TODO need to manually do the thing that jquery UI draggable was doing for us
     // TODO maybe refactor out some of the stuff above into an "assign var" function,
