@@ -209,10 +209,14 @@ function initDragGui(variables, userData){
 	for (val in initialVals) {
 		$("#" + val + "-target").find(".valbox").html(getVarById(initialVals[val]).name);
 		var problem = detectBadAssignment(getVarById(initialVals[val]), val, initialVals);
-	      if (problem) {
-	        $("#output").html(problem);
-	        return;
-	      }
+	    if (problem) {
+	       $("#output").html(problem);
+	       return;
+	    }
+		assignments[getVarById(initialVals[val]).name] = val
+		
+		//initialize these values in params
+		params[val] = initialVals[val]
 	}
   }
   
@@ -233,6 +237,7 @@ function initDragGui(variables, userData){
         return;
       }
 
+	  var oldValinRole = params[variableRole];
       var oldRole = assignments[variableName];
       if (oldRole) {
         // TODO if the swapping would create an invalid assignment, just drop the old one
@@ -249,7 +254,9 @@ function initDragGui(variables, userData){
         }
       }
       $(this).find(".valbox").html(variableName);
-      assignments[variableName] = variableRole;
+      
+      delete assignments[getVarById(oldValinRole).name];	
+	  assignments[variableName] = variableRole;
       params[variableRole] = variableId;
 
       updateFragment(params);
