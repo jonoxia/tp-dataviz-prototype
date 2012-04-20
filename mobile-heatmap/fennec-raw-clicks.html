@@ -1,0 +1,64 @@
+
+<html>
+<head>
+<style>
+table { min-width: 300px;
+}
+.listing { 
+    float: left;
+}
+#picture {
+     float: left;
+}
+caption {
+    height: 50px; 
+    text-align: left;
+    border:  
+}
+
+</style>
+<script src="jquery.js"></script>
+<script src="make-heatmap.js"></script>
+</head>
+<body onload="loadCanvas();">
+<div  id="picture">
+<canvas id="the-canvas" width="732" height="581"></canvas>
+<div id="debug"></div>
+</div>
+<div class='listing'> 
+<table>
+<caption>
+Total number of hits on each element: 
+</caption>
+    
+        <tr><td><span id='value0' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(-0.777847280876,75.1620515168%,50.1080343446%)">4923</span></td><td><span class='label'>Switch tab</span></td></tr>
+        <tr><td><span id='value1' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(4.38089582681,74.0873133694%,49.3915422463%)">2845</span></td><td><span class='label'>Hide Left bar</span></td></tr>
+        <tr><td><span id='value2' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(4.59897194801,74.0418808442%,49.3612538961%)">2782</span></td><td><span class='label'>Show Left bar</span></td></tr>
+        <tr><td><span id='value3' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(8.71035257346,73.1853432139%,48.7902288092%)">1845</span></td><td><span class='label'>Close tab</span></td></tr>
+        <tr><td><span id='value4' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(15.7198931866,71.7250222528%,47.8166815019%)">961</span></td><td><span class='label'>URL bar</span></td></tr>
+        <tr><td><span id='value5' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(16.4481060344,71.5733112428%,47.7155408286%)">901</span></td><td><span class='label'>Show Right bar</span></td></tr>
+        <tr><td><span id='value6' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(16.7291446424,71.5147615328%,47.6765076885%)">879</span></td><td><span class='label'>Hide Right bar</span></td></tr>
+        <tr><td><span id='value7' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(30.5040260506,68.6449945728%,45.7633297152%)">290</span></td><td><span class='label'>Edit URL bar</span></td></tr>
+        <tr><td><span id='value8' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(31.7383077122,68.38785256%,45.5919017066%)">265</span></td><td><span class='label'>Reload</span></td></tr>
+        <tr><td><span id='value9' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(33.0594749206,68.1126093915%,45.408406261%)">241</span></td><td><span class='label'>Open Panel</span></td></tr>
+        <tr><td><span id='value10' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(34.8799610485,67.7333414482%,45.1555609655%)">212</span></td><td><span class='label'>GConsole</span></td></tr>
+        <tr><td><span id='value11' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(36.0154762319,67.496775785%,44.9978505234%)">196</span></td><td><span class='label'>Bookmarks</span></td></tr>
+        <tr><td><span id='value12' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(37.1032066634,67.2701652785%,44.8467768523%)">182</span></td><td><span class='label'>Addons</span></td></tr>
+        <tr><td><span id='value13' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(39.0309618728,66.8685496098%,44.5790330732%)">160</span></td><td><span class='label'>Stop</span></td></tr>
+        <tr><td><span id='value14' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(43.3822961465,65.9620216361%,43.9746810908%)">121</span></td><td><span class='label'>New Tab</span></td></tr>
+        <tr><td><span id='value15' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(47.1799405974,65.1708457089%,43.4472304726%)">96</span></td><td><span class='label'>Downloads</span></td></tr>
+        <tr><td><span id='value16' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(50.9789115045,64.3793934366%,42.9195956244%)">77</span></td><td><span class='label'>Search</span></td></tr>
+        <tr><td><span id='value17' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(51.6835329245,64.2325973074%,42.8217315383%)">74</span></td><td><span class='label'>Back</span></td></tr>
+        <tr><td><span id='value18' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(54.9000849872,63.5624822943%,42.3749881962%)">62</span></td><td><span class='label'>Site ID</span></td></tr>
+        <tr><td><span id='value19' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(55.826013054,63.3695806138%,42.2463870758%)">59</span></td><td><span class='label'>Preferences</span></td></tr>
+        <tr><td><span id='value20' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(59.8003613154,62.5415913926%,41.6943942618%)">48</span></td><td><span class='label'>History</span></td></tr>
+        <tr><td><span id='value21' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(64.558386989,61.5503360439%,41.0335573626%)">38</span></td><td><span class='label'>Bookmark Star</span></td></tr>
+        <tr><td><span id='value22' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(67.5785726163,60.9211307049%,40.6140871366%)">33</span></td><td><span class='label'>Desktop tabs</span></td></tr>
+        <tr><td><span id='value23' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(70.450975316,60.3227134758%,40.2151423172%)">29</span></td><td><span class='label'>Undo close tab</span></td></tr>
+        <tr><td><span id='value24' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(83.5892796073,57.5855667485%,38.3903778323%)">17</span></td><td><span class='label'>Forward</span></td></tr>
+</table>
+
+</div>
+
+</body>
+</html>

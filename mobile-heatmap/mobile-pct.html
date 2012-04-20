@@ -1,0 +1,70 @@
+<html>
+<head>
+<style>
+table { min-width: 300px;
+}
+.listing { 
+    float: left;
+}
+#picture {
+     float: left;
+}
+caption {
+    height: 50px; 
+    text-align: left;
+    border:  
+}                                                                  
+.colorlabel {
+    padding: 5px; 
+    text-align: right; 
+    margin: 0 10 0 0; 
+    display:block; 
+}
+
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="jquery.js"></script>
+<script src="make-heatmap.js"></script>
+</head>
+<body onload="loadCanvas();">
+<div  id="picture">
+   <canvas id="the-canvas" width="732" height="581"></canvas>
+   <div id="debug"></div>
+</div>
+<div class='listing'> 
+<table>
+<caption>
+Percentage of users who used each item at least once:
+</caption>
+    
+        <tr><td><span id='value0' class='colorlabel' style="background-color: hsl(1.57930637535,74.6709778385%,49.7806518923%)">97 %</span></td><td><span class='label'>Switch tab</span></td></tr>
+        <tr><td><span id='value1' class='colorlabel' style="background-color: hsl(5.67306926029,73.8181105708%,49.2120737138%)">92 %</span></td><td><span class='label'>Hide Left bar</span></td></tr>
+        <tr><td><span id='value2' class='colorlabel' style="background-color: hsl(5.67306926029,73.8181105708%,49.2120737138%)">92 %</span></td><td><span class='label'>Show Left bar</span></td></tr>
+        <tr><td><span id='value3' class='colorlabel' style="background-color: hsl(6.5181910778,73.6420435255%,49.0946956836%)">91 %</span></td><td><span class='label'>Close tab</span></td></tr>
+        <tr><td><span id='value4' class='colorlabel' style="background-color: hsl(8.23634830092,73.284094104%,48.856062736%)">89 %</span></td><td><span class='label'>URL bar</span></td></tr>
+        <tr><td><span id='value5' class='colorlabel' style="background-color: hsl(13.6297285089,72.1604732273%,48.1069821515%)">83 %</span></td><td><span class='label'>Show Right bar</span></td></tr>
+        <tr><td><span id='value6' class='colorlabel' style="background-color: hsl(14.5659433723,71.9654284641%,47.9769523094%)">82 %</span></td><td><span class='label'>Hide Right bar</span></td></tr>
+        <tr><td><span id='value7' class='colorlabel' style="background-color: hsl(24.6018851783,69.8746072545%,46.583071503%)">72 %</span></td><td><span class='label'>Edit URL bar</span></td></tr>
+        <tr><td><span id='value8' class='colorlabel' style="background-color: hsl(32.4820916025,68.2328975828%,45.4885983885%)">65 %</span></td><td><span class='label'>Reload</span></td></tr>
+        <tr><td><span id='value9' class='colorlabel' style="background-color: hsl(48.1691232319,64.9647659934%,43.3098439956%)">53 %</span></td><td><span class='label'>New Tab</span></td></tr>
+        <tr><td><span id='value10' class='colorlabel' style="background-color: hsl(48.1691232319,64.9647659934%,43.3098439956%)">53 %</span></td><td><span class='label'>Stop</span></td></tr>
+        <tr><td><span id='value11' class='colorlabel' style="background-color: hsl(49.6303434719,64.66034511%,43.10689674%)">52 %</span></td><td><span class='label'>Addons</span></td></tr>
+        <tr><td><span id='value12' class='colorlabel' style="background-color: hsl(60.7035902973,62.3534186881%,41.568945792%)">45 %</span></td><td><span class='label'>Search</span></td></tr>
+        <tr><td><span id='value13' class='colorlabel' style="background-color: hsl(65.9756779957,61.2550670842%,40.8367113895%)">42 %</span></td><td><span class='label'>Bookmarks</span></td></tr>
+        <tr><td><span id='value14' class='colorlabel' style="background-color: hsl(65.9756779957,61.2550670842%,40.8367113895%)">42 %</span></td><td><span class='label'>Downloads</span></td></tr>
+        <tr><td><span id='value15' class='colorlabel' style="background-color: hsl(71.629201561,60.0772496748%,40.0514997832%)">39 %</span></td><td><span class='label'>History</span></td></tr>
+        <tr><td><span id='value16' class='colorlabel' style="background-color: hsl(73.6083707352,59.6649227635%,39.7766151757%)">38 %</span></td><td><span class='label'>Open Panel</span></td></tr>
+        <tr><td><span id='value17' class='colorlabel' style="background-color: hsl(77.7236896679,58.8075646525%,39.2050431017%)">36 %</span></td><td><span class='label'>Desktop tabs</span></td></tr>
+        <tr><td><span id='value18' class='colorlabel' style="background-color: hsl(77.7236896679,58.8075646525%,39.2050431017%)">36 %</span></td><td><span class='label'>Preferences</span></td></tr>
+        <tr><td><span id='value19' class='colorlabel' style="background-color: hsl(86.667490822,56.9442727454%,37.9628484969%)">32 %</span></td><td><span class='label'>Site ID</span></td></tr>
+        <tr><td><span id='value20' class='colorlabel' style="background-color: hsl(102.354522451,53.676141156%,35.784094104%)">26 %</span></td><td><span class='label'>Bookmark Star</span></td></tr>
+        <tr><td><span id='value21' class='colorlabel' style="background-color: hsl(102.354522451,53.676141156%,35.784094104%)">26 %</span></td><td><span class='label'>Undo close tab</span></td></tr>
+        <tr><td><span id='value22' class='colorlabel' style="background-color: hsl(108.370798439,52.4227503252%,34.9485002168%)">24 %</span></td><td><span class='label'>Back</span></td></tr>
+        <tr><td><span id='value23' class='colorlabel' style="background-color: hsl(108.370798439,52.4227503252%,34.9485002168%)">24 %</span></td><td><span class='label'>Forward</span></td></tr>
+        <tr><td><span id='value24' class='colorlabel' style="background-color: hsl(159.490196585,41.7728757115%,27.8485838077%)">12 %</span></td><td><span class='label'>Console</span></td></tr>
+</table>
+
+</div>
+</body>
+</html>
+

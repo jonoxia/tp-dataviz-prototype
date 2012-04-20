@@ -1,0 +1,128 @@
+
+
+<html>
+<head>
+<style>
+table { min-width: 300px;
+}
+.listing { 
+    float: left;
+}
+#picture {
+     float: left;
+}
+caption {
+    height: 50px; 
+    text-align: left;
+    border:  
+}
+
+</style>
+<script src="jquery.js"></script>
+<script language="javascript">
+  var rectangles = [
+    [9, 165, 72, 49],
+    [3, 232, 27, 24],
+    [84, 160, 62, 416],
+    [84, 160, 62, 416],
+    [131, 119, 201, 41],
+    [332, 165, 46, 413],
+    [332, 165, 46, 413],
+    [91, 11, 194, 42],
+    [332, 119, 39, 40],
+    [557, 115, 55, 43],
+    [377, 120, 40, 37],
+    [6, 540, 73, 38],
+    [498, 117, 58, 39],
+    [286, 10, 38, 40],
+    [381, 540, 48, 40],
+    [90, 120, 41, 39],
+    [310, 54, 63, 47],
+    [167, 53, 69, 48],
+    [443, 115, 55, 44],
+    [378, 161, 50, 42],
+    [243, 55, 63, 46],
+    [10, 481, 72, 49],
+    [379, 205, 50, 37],
+    [379, 248, 50, 40],
+    [613, 115, 56, 43]];
+
+  function loadCanvas() {
+    var can = $("#the-canvas");
+    var ctx = can[0].getContext("2d");
+    var img = new Image();
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0);
+      for (var i = 0; i < rectangles.length; i++) {
+        if (i == 3 || i == 6) continue;
+        var span = $("#value" + i);
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = span.css("background-color");
+        ctx.fillRect(rectangles[i][0], rectangles[i][1], rectangles[i][2], rectangles[i][3]);
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = "white";
+        ctx.font = "14pt Helvetica";
+        var txt = span.html() + "%";
+        ctx.fillText(txt, rectangles[i][0] + 10, rectangles[i][1] + 20);
+      }
+    }
+    img.src = "fennec-ui-bw.png";
+
+    var x = 0;
+    var y = 0;
+    can.bind("mousedown", function(evt) {
+        x = evt.clientX - can.offset().left;
+        y = evt.clientY - can.offset().top;
+     });
+     can.bind("mouseup", function(evt) {
+        var endX = evt.clientX - can.offset().left;
+        var endY = evt.clientY - can.offset().top;
+
+       $("#debug").append(x + ", " + y + ",  " + (endX - x) + ", " + (endY - y) + "<br/>");
+     });
+  }
+</script>
+</head>
+<body onload="loadCanvas();">
+<div  id="picture">
+<canvas id="the-canvas" width="732" height="581"></canvas>
+<div id="debug"></div>
+</div>
+<div class='listing'> 
+<table>
+<caption>
+Percentage of users who used each item at least once: 
+</caption>
+    
+    
+        <tr><td><span id='value0' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(0.785664972441,74.8363197974%,49.8908798649%)">98</span></td><td><span class='label'>Switch tab</span></td></tr>
+        <tr><td><span id='value1' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(4.00975104801,74.1646351983%,49.4430901322%)">94</span></td><td><span class='label'>Close tab</span></td></tr>
+        <tr><td><span id='value2' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(5.67306926029,73.8181105708%,49.2120737138%)">92</span></td><td><span class='label'>Hide Left bar</span></td></tr>
+        <tr><td><span id='value3' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(5.67306926029,73.8181105708%,49.2120737138%)">92</span></td><td><span class='label'>Show Left bar</span></td></tr>
+        <tr><td><span id='value4' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(7.3725493822,73.464052212%,48.976034808%)">90</span></td><td><span class='label'>URL bar</span></td></tr>
+        <tr><td><span id='value5' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(23.5382904484,70.0961894899%,46.7307929933%)">73</span></td><td><span class='label'>Hide Right bar</span></td></tr>
+        <tr><td><span id='value6' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(23.5382904484,70.0961894899%,46.7307929933%)">73</span></td><td><span class='label'>Show Right bar</span></td></tr>
+        <tr><td><span id='value7' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(25.6801506424,69.6499686162%,46.4333124108%)">71</span></td><td><span class='label'>Edit URL bar</span></td></tr>
+        <tr><td><span id='value8' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(27.8823527974,69.1911765005%,46.1274510004%)">69</span></td><td><span class='label'>Reload</span></td></tr>
+        <tr><td><span id='value9' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(41.2466379044,66.4069504366%,44.2713002911%)">58</span></td><td><span class='label'>Addons</span></td></tr>
+        <tr><td><span id='value10' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(43.942525979,65.8453070877%,43.8968713918%)">56</span></td><td><span class='label'>Stop</span></td></tr>
+        <tr><td><span id='value11' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(46.734715891,65.263600856%,43.5090672374%)">54</span></td><td><span class='label'>New Tab</span></td></tr>
+        <tr><td><span id='value12' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(62.4217475204,61.9954692666%,41.3303128444%)">44</span></td><td><span class='label'>Downloads</span></td></tr>
+        <tr><td><span id='value13' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(62.4217475204,61.9954692666%,41.3303128444%)">44</span></td><td><span class='label'>Search</span></td></tr>
+        <tr><td><span id='value14' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(79.8655498619,58.3613437788%,38.9075625192%)">35</span></td><td><span class='label'>Open Panel</span></td></tr>
+        <tr><td><span id='value15' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(79.8655498619,58.3613437788%,38.9075625192%)">35</span></td><td><span class='label'>Site ID</span></td></tr>
+        <tr><td><span id='value16' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(84.3337949324,57.4304593891%,38.2869729261%)">33</span></td><td><span class='label'>Desktop tabs</span></td></tr>
+        <tr><td><span id='value17' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(89.0730039024,56.443124187%,37.628749458%)">31</span></td><td><span class='label'>Bookmarks</span></td></tr>
+        <tr><td><span id='value18' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(89.0730039024,56.443124187%,37.628749458%)">31</span></td><td><span class='label'>Preferences</span></td></tr>
+        <tr><td><span id='value19' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(94.1181741505,55.392047052%,36.928031368%)">29</span></td><td><span class='label'>Bookmark Star</span></td></tr>
+        <tr><td><span id='value20' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(94.1181741505,55.392047052%,36.928031368%)">29</span></td><td><span class='label'>History</span></td></tr>
+        <tr><td><span id='value21' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(94.1181741505,55.392047052%,36.928031368%)">29</span></td><td><span class='label'>Undo close tab</span></td></tr>
+        <tr><td><span id='value22' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(125.81460078,48.7886248374%,32.5257498916%)">19</span></td><td><span class='label'>Back</span></td></tr>
+        <tr><td><span id='value23' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(125.81460078,48.7886248374%,32.5257498916%)">19</span></td><td><span class='label'>Forward</span></td></tr>
+        <tr><td><span id='value24' style="padding: 5px; text-align: right; margin: 0 10 0 0; display:block; background-color: hsl(134.050949081,47.0727189414%,31.3818126276%)">17</span></td><td><span class='label'>Console</span></td></tr>
+</table>
+</div>
+
+</body>
+</html>
+

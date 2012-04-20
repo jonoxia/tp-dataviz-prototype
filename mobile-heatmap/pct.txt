@@ -1,0 +1,26 @@
+Addons    52
+Back    24
+Bookmark Star    26
+Bookmarks    42
+Close tab    91
+Console    12
+Desktop tabs    36
+Downloads    42
+Edit URL bar    72
+Forward    24
+Hide Left bar    92
+Hide Right bar    82
+History    39
+New Tab    53
+Open Panel    38
+Preferences    36
+Reload    65
+Search    45
+Show Left bar    92
+Show Right bar    83
+Site ID    32
+Stop    53
+Switch tab    97
+URL bar    89
+Undo close tab    26 
+

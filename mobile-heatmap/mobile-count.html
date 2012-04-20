@@ -1,0 +1,71 @@
+<html>
+<head>
+<style>
+table { min-width: 300px;
+}
+.listing { 
+    float: left;
+}
+#picture {
+     float: left;
+}
+caption {
+    height: 50px; 
+    text-align: left;
+    border:  
+}                                                                  
+.colorlabel {
+    padding: 5px; 
+    text-align: right; 
+    margin: 0 10 0 0; 
+    display:block;
+    color: white;
+}
+
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="jquery.js"></script>
+<script src="make-heatmap.js"></script>
+</head>
+<body onload="loadCanvas();">
+<div  id="picture">
+   <canvas id="the-canvas" width="732" height="581"></canvas>
+   <div id="debug"></div>
+</div>
+<div class='listing'> 
+<table>
+<caption>
+Mean clicks per user (total clicks / number of users)
+</caption>
+    
+        <tr><td><span id='value0' class='colorlabel' style="background-color: hsl(44.217299572,65.7880625892%,43.8587083928%)">55.8</span></td><td><span class='label'>Switch tab</span></td></tr>
+        <tr><td><span id='value1' class='colorlabel' style="background-color: hsl(98.4026987915,54.4994377518%,36.3329585012%)">27.4</span></td><td><span class='label'>Hide Left bar</span></td></tr>
+        <tr><td><span id='value2' class='colorlabel' style="background-color: hsl(100.353641568,54.0929913399%,36.0619942266%)">26.7</span></td><td><span class='label'>Show Left bar</span></td></tr>
+        <tr><td><span id='value3' class='colorlabel' style="background-color: hsl(109.950104814,52.0937281637%,34.7291521091%)">23.5</span></td><td><span class='label'>Close tab</span></td></tr>
+        <tr><td><span id='value4' class='colorlabel' style="background-color: hsl(139.911035193,45.851867668%,30.5679117787%)">15.7</span></td><td><span class='label'>URL bar</span></td></tr>
+        <tr><td><span id='value5' class='colorlabel' style="background-color: hsl(168.397561939,39.917174596%,26.6114497307%)">10.6</span></td><td><span class='label'>Hide Right bar</span></td></tr>
+        <tr><td><span id='value6' class='colorlabel' style="background-color: hsl(168.397561939,39.917174596%,26.6114497307%)">10.6</span></td><td><span class='label'>Show Right bar</span></td></tr>
+        <tr><td><span id='value7' class='colorlabel' style="background-color: hsl(218.640629698,29.4498688129%,19.6332458753%)">5.1</span></td><td><span class='label'>Edit URL bar</span></td></tr>
+        <tr><td><span id='value8' class='colorlabel' style="background-color: hsl(221.246637904,28.9069504366%,19.2713002911%)">4.9</span></td><td><span class='label'>Reload</span></td></tr>
+        <tr><td><span id='value9' class='colorlabel' style="background-color: hsl(242.42174752,24.4954692666%,16.3303128444%)">3.5</span></td><td><span class='label'>Bookmarks</span></td></tr>
+        <tr><td><span id='value10' class='colorlabel' style="background-color: hsl(262.067752017,20.4025516631%,13.6017011088%)">2.5</span></td><td><span class='label'>Stop</span></td></tr>
+        <tr><td><span id='value11' class='colorlabel' style="background-color: hsl(279.511554358,16.7684261753%,11.1789507836%)">1.8</span></td><td><span class='label'>New Tab</span></td></tr>
+        <tr><td><span id='value12' class='colorlabel' style="background-color: hsl(279.511554358,16.7684261753%,11.1789507836%)">1.8</span></td><td><span class='label'>Site ID</span></td></tr>
+        <tr><td><span id='value13' class='colorlabel' style="background-color: hsl(282.354522451,16.176141156%,10.784094104%)">1.7</span></td><td><span class='label'>Back</span></td></tr>
+        <tr><td><span id='value14' class='colorlabel' style="background-color: hsl(282.354522451,16.176141156%,10.784094104%)">1.7</span></td><td><span class='label'>Search</span></td></tr>
+        <tr><td><span id='value15' class='colorlabel' style="background-color: hsl(288.370798439,14.9227503252%,9.9485002168%)">1.5</span></td><td><span class='label'>Addons</span></td></tr>
+        <tr><td><span id='value16' class='colorlabel' style="background-color: hsl(288.370798439,14.9227503252%,9.9485002168%)">1.5</span></td><td><span class='label'>Downloads</span></td></tr>
+        <tr><td><span id='value17' class='colorlabel' style="background-color: hsl(294.888989517,13.5647938507%,9.04319590044%)">1.3</span></td><td><span class='label'>Open Panel</span></td></tr>
+        <tr><td><span id='value18' class='colorlabel' style="background-color: hsl(298.363917452,12.8408505308%,8.56056702056%)">1.2</span></td><td><span class='label'>History</span></td></tr>
+        <tr><td><span id='value19' class='colorlabel' style="background-color: hsl(309.824351828,10.4532600357%,6.96884002382%)">0.9</span></td><td><span class='label'>Preferences</span></td></tr>
+        <tr><td><span id='value20' class='colorlabel' style="background-color: hsl(314.050949081,9.57271894137%,6.38181262758%)">0.8</span></td><td><span class='label'>Bookmark Star</span></td></tr>
+        <tr><td><span id='value21' class='colorlabel' style="background-color: hsl(318.519194152,8.64183455169%,5.76122303446%)">0.7</span></td><td><span class='label'>Desktop tabs</span></td></tr>
+        <tr><td><span id='value22' class='colorlabel' style="background-color: hsl(328.30357337,6.60342221459%,4.40228147639%)">0.5</span></td><td><span class='label'>Console</span></td></tr>
+        <tr><td><span id='value23' class='colorlabel' style="background-color: hsl(328.30357337,6.60342221459%,4.40228147639%)">0.5</span></td><td><span class='label'>Forward</span></td></tr>
+        <tr><td><span id='value24' class='colorlabel' style="background-color: hsl(328.30357337,6.60342221459%,4.40228147639%)">0.5</span></td><td><span class='label'>Undo close tab</span></td></tr>
+</table>
+
+</div>
+</body>
+</html>
+
