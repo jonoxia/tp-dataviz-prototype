@@ -10,10 +10,15 @@ function updateFragment(params) {
 
 function getUrlParams() {
 	var args = {}
-	var params = ("" + window.location).split("#")[1]
-	params_list = params.split("&")
-	for (var pair in params_list) {
-		args[params_list[pair].split("=")[0]] = params_list[pair].split("=")[1]
+	if (("" +window.location).search("#") != -1) {
+		var params = ("" + window.location).split("#")[1]
+		console.log(params)
+		if (params != "") {
+			params_list = params.split("&")
+			for (var pair in params_list) {
+				args[params_list[pair].split("=")[0]] = params_list[pair].split("=")[1]
+			}
+		}
 	}
 	return args
 }
@@ -254,8 +259,9 @@ function initDragGui(variables, userData){
         }
       }
       $(this).find(".valbox").html(variableName);
-      
-      delete assignments[getVarById(oldValinRole).name];	
+      if (oldValinRole in assignments) {
+      	delete assignments[getVarById(oldValinRole).name];
+      }	
 	  assignments[variableName] = variableRole;
       params[variableRole] = variableId;
 
