@@ -1,0 +1,49 @@
+<html>
+<head>
+<style>
+table { min-width: 300px;
+}
+.listing { 
+    float: left;
+}
+#picture {
+     float: left;
+}
+caption {
+    height: 50px; 
+    text-align: left;
+    border:  
+}                                                                  
+.colorlabel {
+    padding: 5px; 
+    text-align: right; 
+    margin: 0 10 0 0; 
+    display:block;
+    color: white;
+}
+
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="jquery.js"></script>
+<script src="make-heatmap.js"></script>
+</head>
+<body onload="loadCanvas();">
+<div  id="picture">
+   <canvas id="the-canvas" width="1000" height="581"></canvas>
+</div>
+
+
+
+<table>
+<caption>
+Total number of hits on each element: 
+</caption>
+	<script>  	 
+		make_legend()
+	</script> 
+
+</table>
+
+
+</body>
+</html>
