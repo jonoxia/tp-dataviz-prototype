@@ -76,7 +76,7 @@
     "datatype": "factor",
     "semantics": "per_user", 
     "url": "", 
-    "id": "menu bar - hidden?",
+    "id": "menu_bar_hidden",
     "name": "Menu bar setting", 
     "description": "Did the user have the menu bar shown or hidden?"
   },
@@ -84,7 +84,7 @@
     "datatype": "factor",
     "semantics": "per_user", 
     "url": "", 
-    "id": "bookmark bar - hidden?", 
+    "id": "bookmark_bar_hidden", 
     "name": "Bookmark bar setting", 
     "description": "Did the user have the bookmarks bar shown or hidden?"
   },
@@ -92,15 +92,7 @@
     "datatype": "factor",
     "semantics": "per_user", 
     "url": "", 
-    "id": "status bar - hidden?", 
-    "name": "Status bar setting", 
-    "description": "Did the user have the status bar shown or hidden?"
-  },
-  {
-    "datatype": "factor",
-    "semantics": "per_user", 
-    "url": "", 
-    "id": "tab bar - tabs on top?", 
+    "id": "tabs_on_top", 
     "name": "Tab bar setting",
     "description": "Did the user have tabs on the top or on the bottom?"
   },
@@ -108,7 +100,7 @@
     "datatype": "integer",
     "semantics": "per_user", 
     "url": "", 
-    "id": "Tab Bar - Num App Tabs", 
+    "id": "num_app_tabs", 
     "name": "Number of App Tabs", 
     "description": "How many app tab did the user pin?"
   },
@@ -116,7 +108,7 @@
     "datatype": "factor",
     "semantics": "per_user", 
     "url": "", 
-    "id": "addon bar - hidden?", 
+    "id": "addon_bar_hidden",
     "name": "Addon bar setting", 
     "description": "Did the user have the addon bar shown or hidden?"
   },
@@ -124,7 +116,7 @@
     "datatype": "factor",
     "semantics": "per_user", 
     "url": "", 
-    "id": "Sync - Configured?", 
+    "id": "sync_configured",
     "name": "Sync configured", 
     "description": "Did the user set up Sync?"
   },
@@ -140,7 +132,7 @@
     "datatype": "integer",
     "semantics": "per_user",
     "url": "", 
-    "id": "bookmark bar - num. bookmarks", 
+    "id": "num_bookmarks_in_bar", 
     "name": "Number of Bookmarks in Bar", 
     "description": "How many bookmarks did the user have in their bookmark bar?"
   },
@@ -156,9 +148,17 @@
     "datatype": "integer",
     "semantics": "per_user", 
     "url": "",
-    "id": "Window - Total Number of Tabs",
+    "id": "num_tabs_in_window",
     "name": "Tabs per window",
     "description": "Number of tabs in one window (needs work)"
+  },
+  {
+    "datatype": "integer",
+    "semantics": "per_user", 
+    "url": "",
+    "id": "num_panorama_groups",
+    "name": "Panorama Groups",
+    "description": "Number of groups in Panorama"
   }
 ],
 

@@ -62,6 +62,44 @@ def mungeCustomizations(inputRecord, outputRecord):
 
     customizations = [ event[1:4] for event in inputRecord["events"] if event[0] == 3]
         
+    # TODO menu bar hidden is producing some with a blank name somehow? not undefined but ""?
+    map = [ {"signature": ["menu bar", "hidden?"],
+             "varId": "menu_bar_hidden",
+             "values": {"true": "Hidden", "false": "Shown"}
+             },
+            {"signature": ["bookmark bar", "hidden?"],
+             "varId": "bookmark_bar_hidden",
+             "values": {"true": "Hidden", "false": "Shown"}
+             },
+            {"signature": ["status bar", "hidden?"],
+             "varId": "status_bar_hidden",
+             "values": {"true": "Hidden", "false": "Shown"}
+             },
+            {"signature": ["addon bar", "hidden?"],
+             "varId": "addon_bar_hidden",
+             "values": {"true": "Hidden", "false": "Shown"}
+             },
+            {"signature": ["tab bar", "tabs on top?"],
+             "varId": "tabs_on_top",
+             "values": {"true": "Top", "false": "Bottom"}
+             },
+            {"signature": ["Tab Bar", "Num App Tabs"],
+             "varId": "num_app_tabs"
+             },
+            {"signature": ["Sync", "Configured?"],
+             "varId": "sync_configured"
+             },
+            {"signature": ["bookmark bar", "num. bookmarks"],
+             "varId": "num_bookmarks_in_bar"
+             },
+            {"signature": ["Window", "Total Number of Tabs"] ,
+             "varId": "num_tabs_in_window"
+             },
+            {"signature": ["Panorama", "Num Groups?"], # appears to be missing
+             "varId": "num_panorama_groups"
+             }
+            ]
+
     # Customizations not in the variables file:
     # Sync - Last Sync Time
     # Panorama - Num Groups?
@@ -75,11 +113,17 @@ def mungeCustomizations(inputRecord, outputRecord):
     # each window in fact. (currently using it wrong in variables file.)
 
     for cust in customizations:
-        custName = "%s - %s" % (cust[0], cust[1])
         # notice later customizations will overwrite earlier customizations
         # TODO actually indicate in the record that user modified this value; we'll want to 
         # exclude users who modified the value during the study from some analysis.
-        outputRecord[custName] = cust[2]
+        for mapping in map:
+            if cust[0] == mapping["signature"][0] and cust[1] == mapping["signature"][1]:
+                if mapping.has_key("values"):
+                    if mapping["values"].has_key(cust[2]):
+                        outputRecord[mapping["varId"]] = mapping["values"][cust[2]]
+                        break
+                outputRecord[mapping["varId"]] = cust[2]
+                break
 
 def lazyGetEventName(event):
     return "numUses_%s" % ( event[0].replace(" ", "-"))
