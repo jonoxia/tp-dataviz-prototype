@@ -16,22 +16,44 @@ import sys
 # This script accomplishes same thing as csv-to-json.py except that intput is json, not csv.
 
 all_variable_names = {}
-allPartOnes = {}
-allPartTwos = {}
-allPartThrees = {}
+all_os_names = {}
+
+def getOSName(osString):
+    if "WINNT" in osString:
+        if ("5.1" in osString) or ("5.2" in osString):
+            return "Win XP"
+        if "6.0" in osString:
+            return "Win Vista"
+        if "6.1" in osString:
+            return "Win 7"
+        if "6.2" in osString:
+            return "Win 8"
+    if "Mac OS X" in osString:
+        return "Mac OS"
+    if "Linux" in osString:
+        return "Linux"
+    else:
+        return "Other"
+
 
 def mungeMetadata(inputRecord, outputRecord):
     metadata_fields = [u'updateChannel',
                        u'fxVersion',
                        u'tpVersion',
-                       u'location',
-                       u'operatingSystem']
+                       u'location']
+
     # Unused metadata fields: accessibilities, event_headers, task_guid. extensions is counted instead of
     # used directly. surveyAnswers will be used in future but requires its own specialized parsing to make
     # sense of.
     for field in metadata_fields:
         outputRecord[field] = inputRecord["metadata"][field]
+ 
+    if inputRecord["metadata"].has_key("operatingSystem"):
+        outputRecord["operatingSystem"] = getOSName(inputRecord["metadata"]["operatingSystem"])
     
+    if outputRecord.has_key("operatingSystem"):
+        all_os_names[outputRecord["operatingSystem"]] = True
+
     # Special-case: extension count
     outputRecord["number_extensions"] = len(inputRecord["metadata"]["extensions"])
 
@@ -74,10 +96,6 @@ def getEventName(event):
     # enter key', and increment "total keyboard actions" ??
     # so maybe we really want a function that returns all af the event types that should be
     # incremented???
-    allPartOnes[event[0]] = True
-    allPartTwos[event[1]] = True
-    allPartThrees[event[2]] = True
-
     if event[0] == u"window":
         try:
             # if the middle value is a number, it's a window id - ignore it for the count!
@@ -164,17 +182,10 @@ def munge(inFileName, outFileName, userLimit):
     infile.close()
     outfile.close()
 
-    #  print "Part ones:"
-    #for key in allPartOnes.keys():
-    #    print key
-    #print "Part twos:"
-    #for key in allPartTwos.keys():
-    #    print key
-    #print "Part threes:"
-    #for key in allPartThrees.keys():
-    #    print key
-    for key in all_variable_names.keys():
+    for key in all_os_names.keys():
         print key
+    #for key in all_variable_names.keys():
+    #    print key
 
 
 if __name__ == "__main__":
