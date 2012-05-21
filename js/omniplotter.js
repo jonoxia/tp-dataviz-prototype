@@ -299,8 +299,8 @@ function doForEachUser(userData, options) {
 
     if (options.eventCountCallback) {
       for (var prop in user) {
-        if (prop.indexOf("numEvents_item") > -1) {
-          var eventName = prop.split("=")[1];
+        if (prop.indexOf("numUses_") > -1) {
+          var eventName = prop.split("numUses_")[1];
           var numEvents = parseInt(user[prop]);
           options.eventCountCallback(eventName, numEvents, color);
         }
