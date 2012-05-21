@@ -28,9 +28,9 @@
     "semantics": "per_user",
     "url": "",
     "id": "numUses_",
-    "name": "Single-Item Use Count",
+    "name": "Use Count Of: ",
     "customizable": "event_names",
-    "description": "Number of times selected"
+    "description": "Number of times selected item was used."
   },
   {
     "datatype": "integer",

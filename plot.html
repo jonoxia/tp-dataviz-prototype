@@ -140,9 +140,29 @@
               $("#output").html(val.description);
             });
 
+            // add popup menu
+            if (val.customizable == "event_names") {
+              var select = $('<select></select>');
+              for (var e in eventNames) {
+                select.append($('<option>' + eventNames[e] + '</option>'));
+              }
+              select.addClass("event_names_select");
+              select.bind("change", function(e) { console.log('You pickd ' + select.val()); });
+              newItem.append(select);
+            }
             
             menu.append(newItem);
           });
+
+         // dynamically create hidden variables for each event_names:
+         $.each(eventNames, function(key, val) {
+            variables.push( { "datatype": "integer",
+                  "semantics": "per_user",
+                  "id": "numUses_" + val,
+                   "name": "Use Count Of " + val,
+                  "description": "Number of times " + val + " was used."
+                  });
+         });
          initDragGui(variables, userData);
         });
       });

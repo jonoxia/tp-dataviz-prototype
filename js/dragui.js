@@ -208,7 +208,7 @@ function initDragGui(variables, userData){
   var params = {};
   var assignments = {};
 
-  initialVals = getUrlParams();
+  var initialVals = getUrlParams();
   if (enoughValsForGraph(initialVals)) {
     drawNewGraph(initialVals);
     for (val in initialVals) {
@@ -231,18 +231,25 @@ function initDragGui(variables, userData){
 
   $( ".dragtarget" ).droppable({
     drop: function( event, ui ) {
-      var variableName = ui.draggable.html();
       var variableId = ui.draggable.attr("id").split("var_")[1];
       var variableRole = $(this).attr("id").split("-target")[0];
 
+      // Check if it's a customizable variable; if so, complete its id by checking the menu setting:
+      if (getVarById(variableId).customizable == "event_names") {
+        var menuSetting = ui.draggable.find(".event_names_select").first().val();
+        variableId = variableId + menuSetting;
+      }
+
+      var variableName = getVarById(variableId).name;
+
       // check if type is ok for role assignment:
-	  var problem = detectBadAssignment(getVarById(variableId), variableRole, params);
+      var problem = detectBadAssignment(getVarById(variableId), variableRole, params);
       if (problem) {
         $("#output").html(problem);
         return;
       }
 
-	  var oldValinRole = params[variableRole];
+      var oldValinRole = params[variableRole];
       var oldRole = assignments[variableName];
       if (oldRole) {
         // TODO if the swapping would create an invalid assignment, just drop the old one
