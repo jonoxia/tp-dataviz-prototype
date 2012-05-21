@@ -9,18 +9,18 @@ function updateFragment(params) {
 }
 
 function getUrlParams() {
-	var args = {}
-	if (("" +window.location).search("#") != -1) {
-		var params = ("" + window.location).split("#")[1]
-		console.log(params)
-		if (params != "") {
-			params_list = params.split("&")
-			for (var pair in params_list) {
-				args[params_list[pair].split("=")[0]] = params_list[pair].split("=")[1]
-			}
-		}
-	}
-	return args
+  var args = {};
+  if (("" +window.location).search("#") != -1) {
+    var params = ("" + window.location).split("#")[1];
+    console.log(params);
+    if (params != "") {
+      params_list = params.split("&");
+      for (var pair in params_list) {
+	args[params_list[pair].split("=")[0]] = params_list[pair].split("=")[1];
+      }
+    }
+  }
+  return args;
 }
 
 function enoughValsForGraph(params) {
@@ -204,27 +204,27 @@ function initDragGui(variables, userData){
     return false;
   }
 
-  
+
   var params = {};
   var assignments = {};
 
   initialVals = getUrlParams();
   if (enoughValsForGraph(initialVals)) {
-	drawNewGraph(initialVals)
-	for (val in initialVals) {
-		$("#" + val + "-target").find(".valbox").html(getVarById(initialVals[val]).name);
-		var problem = detectBadAssignment(getVarById(initialVals[val]), val, initialVals);
-	    if (problem) {
-	       $("#output").html(problem);
-	       return;
-	    }
-		assignments[getVarById(initialVals[val]).name] = val
-		
-		//initialize these values in params
-		params[val] = initialVals[val]
-	}
+    drawNewGraph(initialVals);
+    for (val in initialVals) {
+      $("#" + val + "-target").find(".valbox").html(getVarById(initialVals[val]).name);
+      var problem = detectBadAssignment(getVarById(initialVals[val]), val, initialVals);
+      if (problem) {
+	$("#output").html(problem);
+	return;
+      }
+      assignments[getVarById(initialVals[val]).name] = val;
+
+      //initialize these values in params
+      params[val] = initialVals[val];
+    }
   }
-  
+
   var items = $("#variables_menu").find("li");
   items.draggable({opacity: 0.7,
                    helper: "clone" });
@@ -234,8 +234,8 @@ function initDragGui(variables, userData){
       var variableName = ui.draggable.html();
       var variableId = ui.draggable.attr("id").split("var_")[1];
       var variableRole = $(this).attr("id").split("-target")[0];
-	
-      // check if type is ok for role assignment:  
+
+      // check if type is ok for role assignment:
 	  var problem = detectBadAssignment(getVarById(variableId), variableRole, params);
       if (problem) {
         $("#output").html(problem);
@@ -261,7 +261,7 @@ function initDragGui(variables, userData){
       $(this).find(".valbox").html(variableName);
       if (oldValinRole in assignments) {
       	delete assignments[getVarById(oldValinRole).name];
-      }	
+      }
 	  assignments[variableName] = variableRole;
       params[variableRole] = variableId;
 
@@ -277,7 +277,7 @@ function initDragGui(variables, userData){
 
     // TODO need to manually do the thing that jquery UI draggable was doing for us
     // TODO maybe refactor out some of the stuff above into an "assign var" function,
-    // use that here.  
+    // use that here.
 }
 
 // TODO should be able to drag a variable from its placement after it has been placed.

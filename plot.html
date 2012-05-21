@@ -134,18 +134,21 @@
     });
     
     function makeattrmenu() {
-      $.getJSON("data/beta_ui-variables.json", function(variables) {
+      $.getJSON("data/desktop_heatmap_2012_variables.json", function(varJson) {
         console.log("I got the variables file");
-        $.getJSON("data/beta_ui-data-users.json", function(userData) {
+        $.getJSON("data/desktop_heatmap_2012_users.json", function(userData) {
           console.log("I got the users file");
           var menu = $("#variables_menu");
           menu.empty();
+          var variables = varJson.variablez;
+          var eventNames = varJson.event_names;
           $.each(variables, function(key, val) {
             var newItem = $('<li></li>');
             newItem.addClass([val.datatype].join(' ')).html(val.name).attr("id", "var_" + val.id);
             newItem.on("mouseover", function() {
               $("#output").html(val.description);
             });
+            
             menu.append(newItem);
           });
          initDragGui(variables, userData);
