@@ -368,49 +368,73 @@ function totalEventsByItem(userData, options) {
 
 
 function createHistogramBuckets(userData, options) {
-  var min = null, max = null;
   var numBuckets = 15; // TODO make this customizable
 
-  function compareMinMax(value) {
-    if (min == null) {
-      min = parseFloat(value);
-    } else if (value < min) {
-      min = parseFloat(value);
+  var values = [];
+  // Create sorted list of values:
+  for (var i = 0; i < userData.length; i++) {
+    if (userData[i][ options.varId ] == undefined) {
+      values.push(0);
+    } else {
+      values.push( parseInt(userData[i][ options.varId ]) );
     }
-    if (max == null) {
-      max = parseFloat(value);
-    } else if (value > max) {
-      max = parseFloat(value);
-    }
+  }
+  values = values.sort(function(a, b) { return a - b; });
+  console.log("Values are " + values);
+
+  var numUsers = userData.length;
+  var onePercent = Math.floor(numUsers / 100);
+
+  // Start at the top end, collect outliers until we have 1% of users
+  var outlierThreshold = values[ values.length - onePercent ];
+  console.log("One percent of users are higher than " + outlierThreshold);
+
+  var min = values[0];
+  var max = values[ values.length - 1 ];
+  // calcuate bucket breakpoints (Math.floored to nearest integer)
+  var breakpoints = [];
+  var bucketWidth;
+  if ( (outlierThreshold - min) < 5) {
+    // don't consoidate outliers if it would reduce our number of buckets to something silly
+    outlierThreshold = max;
   }
 
-  // find min and max values:
-  for (var i = 0; i < userData.length; i++) {
-    compareMinMax( userData[i][ options.varId ] );
+  if ((outlierThreshold - min) < numBuckets) {
+    // (if max - min is less than 15 then having 15 buckets will produce duplicate buckets!!
+    //  in this case, reduce number of buckets!)
+    numBuckets = (outlierThreshold - min);
+    bucketWidth = 1;
+  } else {
+    // round off bucket width to a whole number, so all breakpoints will be whole numbers,
+    // equally spaced
+    bucketWidth = Math.floor((outlierThreshold - min)/numBuckets);
   }
-  // calcuate bucket breakpoints (Math.floored to nearest integer)
-  // (TODO if max - min is less than 15 then having 15 buckets will produce duplicate buckets!!
-  //   detect this case, reduce number of buckets!)
-  var breakpoints = [];
-  var bucketWidth = (max - min)/numBuckets;
   for (var j = 0; j < numBuckets; j++) {
-    breakpoints.push( Math.floor(min +  j * bucketWidth));
+    breakpoints.push( min +  j * bucketWidth);
   }
+  // last bucket contains everything from outlierThreshold -> maximum
   breakpoints.push(max);
 
   return breakpoints;
 }
 
 function histogramify(userData, options) {
+  console.log("Histogramify.");
   var labels = [];
   var colorBucketCounts = {};
 
   var breakpoints = createHistogramBuckets(userData, options);
+  console.log("Breakpoints are " + breakpoints);
   var numBuckets = breakpoints.length - 1;
 
-      // control number of sig figs when float is written out
   for (var b = 0; b < numBuckets; b++) {
-    labels.push(breakpoints[b] + " - " + (breakpoints[b+1] - 1));
+    if (breakpoints[b] == breakpoints[b+1] - 1) {
+      // if bucket has a range of 1, just show that one number
+      labels.push("" + breakpoints[b]);
+    } else {
+      // otherwise show min and max of bucket
+      labels.push(breakpoints[b] + " - " + (breakpoints[b+1] - 1));
+    }
   }
 
   // go through a second time, create bucket counts
