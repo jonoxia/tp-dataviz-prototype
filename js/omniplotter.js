@@ -8,7 +8,7 @@
 //   treat "factor with small # of values" different from "factor with large # of values"
 
 //  for lattice, x and y have to be the same axes for all, so find max over all and use that
-//  to determine axes for all
+//  to determine axes for alluse http
  */
 
 
@@ -366,9 +366,8 @@ function totalEventsByItem(userData, options) {
   return toCountsAndLabels(eventCounts);
 }
 
-function histogramify(userData, options) {
-  var labels = [];
-  var colorBucketCounts = {};
+
+function createHistogramBuckets(userData, options) {
   var min = null, max = null;
   var numBuckets = 15; // TODO make this customizable
 
@@ -389,18 +388,30 @@ function histogramify(userData, options) {
   for (var i = 0; i < userData.length; i++) {
     compareMinMax( userData[i][ options.varId ] );
   }
-
-  // calcuate bucket breakpoints
-  // TODO it's weird to have fractional breakpoints if variable is an integer!!
+  // calcuate bucket breakpoints (Math.floored to nearest integer)
+  // (TODO if max - min is less than 15 then having 15 buckets will produce duplicate buckets!!
+  //   detect this case, reduce number of buckets!)
   var breakpoints = [];
   var bucketWidth = (max - min)/numBuckets;
   for (var j = 0; j < numBuckets; j++) {
-    breakpoints.push( min +  j * bucketWidth);
-    // control number of sig figs when float is written out
-    var name = (min + j * bucketWidth).toFixed(1) + " - " + (min + (j+1) * bucketWidth).toFixed(1);
-    labels.push(name);
+    breakpoints.push( Math.floor(min +  j * bucketWidth));
   }
   breakpoints.push(max);
+
+  return breakpoints;
+}
+
+function histogramify(userData, options) {
+  var labels = [];
+  var colorBucketCounts = {};
+
+  var breakpoints = createHistogramBuckets(userData, options);
+  var numBuckets = breakpoints.length - 1;
+
+      // control number of sig figs when float is written out
+  for (var b = 0; b < numBuckets; b++) {
+    labels.push(breakpoints[b] + " - " + (breakpoints[b+1] - 1));
+  }
 
   // go through a second time, create bucket counts
   for (var i = 0; i < userData.length; i++) {
@@ -419,7 +430,7 @@ function histogramify(userData, options) {
     }
     // do the actual bucketing of users:
     for (var j = 0; j < numBuckets; j++) {
-      if (val < (min + (j+1) * bucketWidth) ) {
+      if (val < breakpoints[j+1] ) {
         colorBucketCounts[color][j] ++;
         break;
       }
