@@ -397,6 +397,7 @@ function createHistogramBuckets(userData, options) {
   var outlierThreshold = values[ values.length - onePercent ];
   var breakpoints = [];
   var min = values[0];
+
   var max = values[ values.length - 1 ];
   // calcuate bucket breakpoints (Math.floored to nearest integer)
   var bucketWidth;
@@ -580,11 +581,15 @@ function barplot(data, options) {
 
   // Rotate the x-axis labels if there are a lot of them:
   // TODO >15 is a totally arbitrary number! should count characters in all labels/longest label
-  // to gauge readability.
+  // to gauge readability.  also it should depend on chartwidth.
+// chartwidth < 300 means max length should be 7
+// chartwidth of like 600 means max length should be like 15
   console.log("rotate labels? chartWidth is " + chartWidth);
-  if (labelsForD3.length > 7) {
-    d3.select(".x-axis").selectAll("text").attr("text-anchor", "end")
-      .attr("transform", "rotate(-90) translate(0 -" + barWidth.rangeBand()/2 + ")");
+  if (labelsForD3.length > chartWidth * 7 / 300) {
+    console.log("Rotating Labels!");
+    var offset = (-1) * (barWidth.rangeBand()/2 - 5);
+    d3.selectAll(".x-axis").selectAll("text").attr("text-anchor", "end")
+      .attr("transform", "rotate(-90) translate(0 " + offset + ")");
   }
 }
 
