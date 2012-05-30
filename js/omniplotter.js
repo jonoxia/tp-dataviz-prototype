@@ -398,6 +398,11 @@ function createHistogramBuckets(userData, options) {
   var outlierThreshold = values[ values.length - onePercent ];
   var breakpoints = [];
   var min = values[0];
+  // if we have 0s, create a 0 bucket - that will usually be a useful thing to see.
+  if (min == 0) {
+    breakpoints.push(0);
+    min = 1;
+  }
 
   var max = values[ values.length - 1 ];
   // calcuate bucket breakpoints (Math.floored to nearest integer)
