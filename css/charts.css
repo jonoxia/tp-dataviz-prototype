@@ -36,6 +36,10 @@
     fill: grey;
 }
 
+.chart circle {
+    opacity: 0.1;
+}
+
 .y.axis line, .y.axis path {
   fill: none;
   stroke: #000;
