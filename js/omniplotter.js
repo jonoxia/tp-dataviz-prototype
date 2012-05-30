@@ -66,8 +66,8 @@ function latticificate(userData, latticeVar) {
 function makeChart(options) {
   var leftMargin = 5;
   var topMargin = 5;
-  var rightMargin = 95;
-  var bottomMargin = 95;
+  var rightMargin = 105;
+  var bottomMargin = 105;
 
   var chartWidth = options.chartWidth - leftMargin - rightMargin;
   var chartHeight = options.chartHeight - topMargin - bottomMargin;
@@ -207,13 +207,13 @@ function scatterplot(userData, xVar, yVar, options) {
 
   // Add the x-axis:
   chart.append("svg:g")
-      .attr("class", "x axis")
+      .attr("class", "x-axis")
       .attr("transform", "translate(0, " + chartHeight + ")")
       .call(xAxis);
 
   // Add the y-axis.
   chart.append("svg:g")
-      .attr("class", "y axis")
+      .attr("class", "y-axis")
       .attr("transform", "translate(" + chartWidth + ",0)")
       .call(yAxis);
 
@@ -395,12 +395,10 @@ function createHistogramBuckets(userData, options) {
 
   // Start at the top end, collect outliers until we have 1% of users
   var outlierThreshold = values[ values.length - onePercent ];
-  console.log("One percent of users are higher than " + outlierThreshold);
-
+  var breakpoints = [];
   var min = values[0];
   var max = values[ values.length - 1 ];
   // calcuate bucket breakpoints (Math.floored to nearest integer)
-  var breakpoints = [];
   var bucketWidth;
   if ( (outlierThreshold - min) < 5) {
     // don't consoidate outliers if it would reduce our number of buckets to something silly
@@ -528,6 +526,7 @@ function barplot(data, options) {
   }
 
   // Ordinal scale:
+  // (TODO to set the order, sort labelsForD3 before passing into .domain().)
   var barWidth = d3.scale.ordinal()
     .domain(labelsForD3)
     .rangeBands([0, (horizBars? chartHeight: chartWidth)]);
@@ -540,10 +539,10 @@ function barplot(data, options) {
   }
 
   var xAxis = chart.append("svg:g")
-    .attr("class", "x axis")
+    .attr("class", "x-axis")
     .attr("transform", "translate(0, " + chartHeight + ")");
   var yAxis = chart.append("svg:g")
-    .attr("class", "y axis")
+    .attr("class", "y-axis")
     .attr("transform", "translate(" + chartWidth + ",0)");
 
   if (horizBars) {
@@ -579,27 +578,13 @@ function barplot(data, options) {
       .attr("class", colorMap);
   }
 
-  // Text goes outside the chart so as not to be upside-down
-  /*var texties = container.selectAll("text")
-   .data(dataForD3)
- .enter().append("svg:text")
-   .attr("dx", -3) // padding-right
-   .attr("dy", ".35em") // vertical-align: middle
-   .attr("text-anchor", "end") // text-align: right
-   .text(function(d, i) {return labelsForD3[i];});
-
-  if (horizBars) {
-    texties.attr("x", leftMargin)
-      .attr("y", function(d, i) {return chartHeight - (i * barWidth + barWidth/2);});
-  } else {
-    // ROTATE LABELS
-    texties.attr("x", function(d, i) {return i * barWidth + barWidth/2 + leftMargin;})
-      .attr("y", chartHeight)
-      .attr("transform", function(d, i) {
-              return "rotate( -45 " + (i * barWidth + barWidth/2 + leftMargin) + "," + chartHeight + ")";
-            });
+  // Rotate the x-axis labels if there are a lot of them:
+  // TODO >15 is a totally arbitrary number! should count characters in all labels/longest label
+  // to gauge readability.
+  console.log("rotate labels? chartWidth is " + chartWidth);
+  if (labelsForD3.length > 7) {
+    d3.select(".x-axis").selectAll("text").attr("text-anchor", "end")
+      .attr("transform", "rotate(-90) translate(0 -" + barWidth.rangeBand()/2 + ")");
   }
-  */
-
 }
 
