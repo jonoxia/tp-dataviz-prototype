@@ -64,16 +64,19 @@ function latticificate(userData, latticeVar) {
 
 
 function makeChart(options) {
-  var margin = 40;
+  var leftMargin = 5;
+  var topMargin = 5;
+  var rightMargin = 95;
+  var bottomMargin = 95;
 
-  var chartWidth = options.chartWidth - 2 * margin;
-  var chartHeight = options.chartHeight - 2 * margin;
+  var chartWidth = options.chartWidth - leftMargin - rightMargin;
+  var chartHeight = options.chartHeight - topMargin - bottomMargin;
 
   var chart = d3.select("#imagearea").append("svg:svg")
-    .attr("width", chartWidth + 2 * margin)
-    .attr("height", chartHeight + 2 * margin)
+    .attr("width", chartWidth + leftMargin + rightMargin)
+    .attr("height", chartHeight + topMargin + bottomMargin)
     .attr("class", "chart")
-    .append("svg:g").attr("transform", "translate(" + margin +  ", " + margin + ")");
+    .append("svg:g").attr("transform", "translate(" + leftMargin +  ", " + topMargin + ")");
 
   if (options.caption) {
     chart.append("svg:text")

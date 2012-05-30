@@ -98,7 +98,7 @@ function initDragGui(variables, userData){
     }
 
     var chartWidth = parseInt(d3.select("#imagearea").style("width").replace("px", ""));
-    var chartHeight = 600; // TODO totally arbitrary number
+    var chartHeight = $(document).height() - 180; // TODO 180 is a totally arbitrary number
 
     var dataSets, latticeVar, dataSetName;
     if (params["lattice-x"]) {
@@ -309,8 +309,8 @@ function initDragGui(variables, userData){
           params[oldRole] = null;
         }
       }
-      // TODO any magic that we apply here must also be done on any other
-      // variable assignemnt... should factor it out into an "assign variable" function.
+      // TODO assignment code here is shared with the initial val assignments from url params --
+      // factor that out.
       $(this).find(".valbox").html(variableName);
       $(this).find(".valbox").attr("variable", variableId);
       if (oldValinRole in assignments) {
