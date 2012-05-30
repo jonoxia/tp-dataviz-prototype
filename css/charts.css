@@ -9,11 +9,11 @@
 }
 
 .chart .dataset-1 {
-    fill: red;
+    fill: blue; 
 }
 
 .chart .dataset-2 {
-    fill: blue;
+    fill: red;
 }
 
 .chart .dataset-3 {
