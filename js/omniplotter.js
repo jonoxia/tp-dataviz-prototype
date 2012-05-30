@@ -392,6 +392,7 @@ function createHistogramBuckets(userData, options) {
 
   var numUsers = userData.length;
   var onePercent = Math.floor(numUsers / 100);
+  if (onePercent < 1) onePercent = 1; // zero will screw up the outlier collection
 
   // Start at the top end, collect outliers until we have 1% of users
   var outlierThreshold = values[ values.length - onePercent ];
