@@ -99,7 +99,10 @@ function scatterplot(userData, xVar, yVar, options) {
     if (xVar.semantics == "event_count") {
       return parseInt(record["numEvents"]);
     }
-    var newX = record[ xVar.id ];
+    var newX = 0;  // default to 0 if user data record has no matching property
+    if (record[ xVar.id ] != undefined) {
+      newX = record[ xVar.id ];
+    }
     if (xVar.datatype != "factor") {
       newX = parseFloat(newX);
     }
@@ -110,7 +113,10 @@ function scatterplot(userData, xVar, yVar, options) {
     if (yVar.semantics == "event_count") {
       return parseInt(record["numEvents"]);
     }
-    var newY = record[ yVar.id ];
+    var newY = 0;
+    if (record[ yVar.id ] != undefined) {
+      newY = record[ yVar.id ];
+    }
     if (yVar.datatype != "factor") {
       newY = parseFloat(newY);
     }
@@ -380,7 +386,6 @@ function createHistogramBuckets(userData, options) {
     }
   }
   values = values.sort(function(a, b) { return a - b; });
-  console.log("Values are " + values);
 
   var numUsers = userData.length;
   var onePercent = Math.floor(numUsers / 100);
@@ -439,7 +444,10 @@ function histogramify(userData, options) {
 
   // go through a second time, create bucket counts
   for (var i = 0; i < userData.length; i++) {
-    var val = userData[i][ options.varId ];
+    var val = 0; // default to 0 if user data record has no matching property
+    if (userData[i][ options.varId ] != undefined) {
+      val = userData[i][ options.varId ];
+    }
     // All data will be in 'blah' if there is no colorVar
     var color = "blah";
     if (options.colorVar) {
