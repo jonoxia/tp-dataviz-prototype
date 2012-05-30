@@ -30,7 +30,7 @@ function enoughValsForGraph(params) {
 	return false;
 }
 
-function initDragGui(variables, userData){
+function initDragGui(variables, eventNames, userData){
 
   function getVarById(varId) {
     for(var x = 0; x < variables.length; x++) {
@@ -60,7 +60,7 @@ function initDragGui(variables, userData){
     } else if (options.variable.semantics == "event_name") {
       $("#output").html("Bars represent the " +
                         countStr + " of users who clicked the given item at least once.");
-      counts = whoDidAtLeastOnce(userData, {colorVar: options.colorVar});
+      counts = whoDidAtLeastOnce(userData, eventNames, {colorVar: options.colorVar});
     } else if (options.variable.datatype == "factor") {
       $("#output").html("Bars represent the " +
                         countStr + " of users with the given " + options.variable.name);
@@ -83,8 +83,8 @@ function initDragGui(variables, userData){
                      width: options.width, height: options.height});
   }
 
-  function eventCountPlot(userData, options) {
-    var counts = totalEventsByItem(userData, {colorVar: options.colorVar});
+  function eventCountPlot(userData, eventNames, options) {
+    var counts = totalEventsByItem(userData, eventNames, {colorVar: options.colorVar});
     $("#output").html("Bars represent number of uses, totalled across all users, for the given item.");
     barplot(counts, {bars: options.bars, caption: options.caption, width: options.width, height: options.height});
   }
@@ -144,12 +144,12 @@ function initDragGui(variables, userData){
       // TODO actually more useful as scatter plot where each dot is a user and one axis
       // is number of events that user had in that category?
       if ( yVar.semantics == "event_name" && xVar.semantics == "event_count") {
-        eventCountPlot(dataSets[dataSetName], {bars: "horizontal", caption: latticeLabel,
+        eventCountPlot(dataSets[dataSetName], eventNames, {bars: "horizontal", caption: latticeLabel,
                                                width: chartWidth, height: chartHeight, colorVar: colorVar});
         continue;
       }
       if ( xVar.semantics == "event_name" && yVar.semantics == "event_count") {
-        eventCountPlot(dataSets[dataSetName], {bars: "vertical", caption: latticeLabel,
+        eventCountPlot(dataSets[dataSetName], eventNames, {bars: "vertical", caption: latticeLabel,
                                                width: chartWidth, height: chartHeight, colorVar: colorVar});
         continue;
       }

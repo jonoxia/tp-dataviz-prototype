@@ -79,6 +79,7 @@ function makeChart(options) {
     .append("svg:g").attr("transform", "translate(" + leftMargin +  ", " + topMargin + ")");
 
   if (options.caption) {
+    // TODO this needs to go higher up...
     chart.append("svg:text")
       .attr("x", chartWidth/2 - 20)
       .attr("y", 20)
@@ -289,9 +290,8 @@ function toCountsAndLabels(colorDictionary) {
   return {counts: counts, labels: labels, colors: colors};
 }
 
-
-function doForEachUser(userData, options) {
-  //varId, varCallback, eventCountCallback) {
+function countFactors(userData, options) {
+  var factorValueCounts = {};  // will be key = factor name, value = count
 
   for (var i =0; i < userData.length; i++) {
     var user = userData[i];
@@ -300,77 +300,86 @@ function doForEachUser(userData, options) {
     if (options.colorVar) {
       color = userData[i][ options.colorVar.id ];
     }
-
-    if (options.varId) {
-      var value = userData[i][ options.varId ];
-      options.varCallback(value, color);
-    }
-
-    if (options.eventCountCallback) {
-      for (var prop in user) {
-        if (prop.indexOf("numUses_") > -1) {
-          var eventName = prop.split("numUses_")[1];
-          var numEvents = parseInt(user[prop]);
-          options.eventCountCallback(eventName, numEvents, color);
-        }
-      }
-    }
-  }
-}
-
-function countFactors(userData, options) {
-  var factorValueCounts = {};  // will be key = factor name, value = count
-  function addCount(val, color) { // helper function for counts dictionary
     if (!factorValueCounts[color]) {
       factorValueCounts[color] = {};
     }
 
-    if (factorValueCounts[color][val]) {
-      factorValueCounts[color][val] += 1;
-    } else {
-      factorValueCounts[color][val] = 1;
+    if (options.varId) {
+      var val = userData[i][ options.varId ];
+      if (factorValueCounts[color][val]) {
+        factorValueCounts[color][val] += 1;
+      } else {
+        factorValueCounts[color][val] = 1;
+      }
     }
   }
-
-  doForEachUser(userData, { varId: options.varId, varCallback: addCount, colorVar: options.colorVar});
 
   return toCountsAndLabels(factorValueCounts);
 }
 
-function whoDidAtLeastOnce(userData, options) {
-  // for each event, count users who did that event at least once
+function whoDidAtLeastOnce(userData, eventNames, options) {
+  // for each event listed in eventNames, count users who did that event at least once
   var eventCounts = {};
 
-  doForEachUser(userData, { eventCountCallback: function(eventName, numEvents, color) {
-                                  if (!eventCounts[color]) {
-                                    eventCounts[color] = {};
-                                  }
+  for (var i =0; i < userData.length; i++) {
+    var user = userData[i];
 
-                                      if (numEvents > 0) {
-                                        if (eventCounts[color][eventName]) {
-                                          eventCounts[color][eventName] += 1;
-                                        } else {
-                                          eventCounts[color][eventName] = 1;
-                                        }
-                                      }
-                            }, colorVar: options.colorVar});
+    var color = "everybody";
+    if (options.colorVar) {
+      color = userData[i][ options.colorVar.id ];
+    }
+    if (!eventCounts[color]) {
+      eventCounts[color] = {};
+    }
+
+    for (var e in eventNames) {
+      var eventName = eventNames[e];
+      var propName = "numUses_" + eventName;
+      if (user[propName] != undefined) {
+        if (parseInt(user[propName]) > 0) {
+          if (eventCounts[color][eventName]) {
+            eventCounts[color][eventName] += 1;
+          } else {
+            eventCounts[color][eventName] = 1;
+          }
+        }
+      }
+    }
+  }
 
   return toCountsAndLabels(eventCounts);
 }
 
-function totalEventsByItem(userData, options) {
+function totalEventsByItem(userData, eventNames, options) {
+  // for each event, count total number of uses of that event across all users
+  // TODO not very useful, should be mean or median
+  // TODO a lot of duplciated code with whoUsedAtLeastOnce.
   var eventCounts = {};
-  doForEachUser(userData, { eventCountCallback: function(eventName, numEvents, color) {
-                              if (!eventCounts[color]) {
-                                eventCounts[color] = {};
-                              }
 
-                              if (eventCounts[color][eventName]) {
-                                eventCounts[color][eventName] += numEvents;
-                              } else {
-                                eventCounts[color][eventName] = numEvents;
-                              }
-        }, colorVar: options.colorVar});
+  for (var i =0; i < userData.length; i++) {
+    var user = userData[i];
+
+    var color = "everybody";
+    if (options.colorVar) {
+      color = userData[i][ options.colorVar.id ];
+    }
+    if (!eventCounts[color]) {
+      eventCounts[color] = {};
+    }
+
+    for (var e in eventNames) {
+      var eventName = eventNames[e];
+      var propName = "numUses_" + eventName;
+      if (user[propName] != undefined) {
+        var numUses = parseInt(user[propName]);
+        if (eventCounts[color][eventName]) {
+          eventCounts[color][eventName] += numUses;
+        } else {
+          eventCounts[color][eventName] = numUses;
+        }
+      }
+    }
+  }
 
   return toCountsAndLabels(eventCounts);
 }
@@ -391,7 +400,7 @@ function createHistogramBuckets(userData, options) {
   values = values.sort(function(a, b) { return a - b; });
 
   var numUsers = userData.length;
-  var onePercent = Math.floor(numUsers / 100);
+  var onePercent = Math.floor(numUsers / 50);
   if (onePercent < 1) onePercent = 1; // zero will screw up the outlier collection
 
   // Start at the top end, collect outliers until we have 1% of users
