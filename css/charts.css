@@ -45,3 +45,8 @@
   fill: none;
   stroke: #000;
 }
+
+.dragtarget-hover {
+  background-color: blue;
+  color: white;
+}

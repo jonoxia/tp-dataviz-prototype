@@ -77,7 +77,7 @@
           </div><!--/.well -->
         </div><!--/span-->
 
-        <div class="span3">
+        <div class="span3" id="drop-targets-container">
           <div class="dragtarget" id="x-axis-target">X-axis <span class="valbox"></span></div>
           <div class="dragtarget" id="y-axis-target">Y-axis <span class="valbox"></span></div>
           <div class="dragtarget" id="color-target">Color <span class="valbox"></span></div>
@@ -134,7 +134,7 @@
           var eventNames = varJson.event_names;
           $.each(variables, function(key, val) {
             var newItem = $('<li></li>');
-            newItem.addClass([val.datatype].join(' ')).html(val.name).attr("id", "var_" + val.id);
+            newItem.addClass([val.datatype].join(' ')).html(val.name).attr("variable", val.id);
             newItem.on("mouseover", function() {
               $("#output").html(val.description);
             });

@@ -212,7 +212,9 @@ function initDragGui(variables, userData){
   if (enoughValsForGraph(initialVals)) {
     drawNewGraph(initialVals);
     for (val in initialVals) {
-      $("#" + val + "-target").find(".valbox").html(getVarById(initialVals[val]).name);
+      var valbox = $("#" + val + "-target").find(".valbox");
+      valbox.html(getVarById(initialVals[val]).name);
+      valbox.attr("variable", initialVals[val]);
       var problem = detectBadAssignment(getVarById(initialVals[val]), val, initialVals);
       if (problem) {
 	$("#output").html(problem);
@@ -225,13 +227,55 @@ function initDragGui(variables, userData){
     }
   }
 
-  var items = $("#variables_menu").find("li");
-  items.draggable({opacity: 0.7,
-                   helper: "clone" });
+  function outsideDropTargets(x, y) {
+    var div = $("#drop-targets-container");
+    var left = div.position().left;
+    var top = div.position().top;
+    var right = left + div.width();
+    var bottom = top + div.height();
+    return (x < left || x > right || y < top || y > bottom);
+  }
+
+  function unAssignVariable(varId) {
+    // TODO is there any good reason the assignments[] keys hvae to be variableNames instead of
+    // variableIds?
+    if (varId && varId!= "") {
+      var name = getVarById(varId).name;
+      if (name in assignments) {
+        var role = assignments[name];
+        delete params[role];
+      	delete assignments[name];
+      }
+    }
+  }
+
+  // Make Things Draggable:
+  $("#variables_menu").find("li").draggable({opacity: 0.7,
+                                             helper: "clone" });
+
+  $("div.dragtarget").find(".valbox").draggable({opacity: 0.7,
+                                                 helper: "clone",
+                                                 // Unassign variable if you drag it out of the box:
+                                                 stop: function(e, ui)  {
+                                                   if (outsideDropTargets(e.pageX, e.pageY)) {
+                                                     unAssignVariable($(this).attr("variable"));
+                                                     $(this).empty();
+                                                     // TODO this stuff below is duplicated, factor out
+                                                     updateFragment(params);
+                                                     if (enoughValsForGraph(params)) {
+                                                       $("#imagearea").empty();
+                                                       drawNewGraph(params);
+                                                     }
+                                                   }
+                                                 }});
 
   $( ".dragtarget" ).droppable({
+    hoverClass: "dragtarget-hover",
     drop: function( event, ui ) {
-      var variableId = ui.draggable.attr("id").split("var_")[1];
+      // OK so the object being dropped might be an original variable assignment from the left
+      // column or it might be a re-assignment from another slot in the right column. First thing
+      // we need to do is distinguish which it is... or maybe not...
+      var variableId = ui.draggable.attr("variable");
       var variableRole = $(this).attr("id").split("-target")[0];
 
       // Check if it's a customizable variable; if so, complete its id by checking the menu setting:
@@ -265,11 +309,14 @@ function initDragGui(variables, userData){
           params[oldRole] = null;
         }
       }
+      // TODO any magic that we apply here must also be done on any other
+      // variable assignemnt... should factor it out into an "assign variable" function.
       $(this).find(".valbox").html(variableName);
+      $(this).find(".valbox").attr("variable", variableId);
       if (oldValinRole in assignments) {
       	delete assignments[getVarById(oldValinRole).name];
       }
-	  assignments[variableName] = variableRole;
+      assignments[variableName] = variableRole;
       params[variableRole] = variableId;
 
       updateFragment(params);
