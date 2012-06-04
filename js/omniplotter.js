@@ -12,23 +12,6 @@
  */
 
 
-// TODO:
-// Make page apply parameters from URL when first loaded!
-// Heatmapper page
-//
-// Latticing: share axes between lattice charts!!  And allow a second lattice variable choice...
-// Bar chart with percent axis and colors: currently showing percentage of all users, but should
-// it show percentage of same-color users?
-// When latticing and coloring: there's currently no guarantee the same color means the same thing
-// across all subcharts... this is related to sharing of axes; generate color list and axes min/max
-// outside of the lattice loop.
-// Add option of "particular event count" as a special user-level variable
-// Additional options such as logarithmic scale, regression line, or violin-plot
-// Make share button do something
-// When coloring, generate key for what each color means.
-// Add ability to *remove* a variable assignment!
-
-
 /* To do latticing:
  * 1. factor out the part that decides on the width and height of the svg rectangle
  * 2. factor out the part that draws the graph; take width/height as params
@@ -602,9 +585,18 @@ function barplot(data, options) {
   console.log("rotate labels? chartWidth is " + chartWidth);
   if (labelsForD3.length > chartWidth * 7 / 300) {
     console.log("Rotating Labels!");
-    var offset = (-1) * (barWidth.rangeBand()/2 - 5);
+    var offset = (-1) * (barWidth.rangeBand()/2 - 5); // TODO this needs tweaking
     d3.selectAll(".x-axis").selectAll("text").attr("text-anchor", "end")
       .attr("transform", "rotate(-90) translate(0 " + offset + ")");
   }
+
+  // Show tooltips on hover!
+  // TODO change the sentence here based on the type of graph.
+  // percentage axis: "x % of users have..."
+  // numeric axis: "there are x users with..."
+  // histogram: "...between y and z things"
+  // factors: "...a y value of z"
+  bars.append("svg:title").text(function(d, i) {return "There are " + d + " between " + labelsForD3[i];});
+
 }
 
