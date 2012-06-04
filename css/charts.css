@@ -54,3 +54,19 @@
   background-color: blue;
   color: white;
 }
+
+#x-axis-scale {
+  display: none;
+}
+
+#x-axis-sort {
+  display: none;
+}
+
+#y-axis-scale {
+  display: none;
+}
+
+#y-axis-sort {
+  display: none;
+}

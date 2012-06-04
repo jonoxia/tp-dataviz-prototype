@@ -78,8 +78,28 @@
         </div><!--/span-->
 
         <div class="span2" id="drop-targets-container">
-          <div class="dragtarget" id="x-axis-target">X-axis <span class="valbox"></span></div>
-          <div class="dragtarget" id="y-axis-target">Y-axis <span class="valbox"></span></div>
+          <div class="dragtarget" id="x-axis-target">X-axis <span class="valbox"></span>
+            <span id="x-axis-scale">Scale: <select id="x-axis-scale-menu">
+              <option>Linear</option>
+              <option>Logarithmic</option>
+            </select></span>
+            <span id="x-axis-sort">Sorted by: <select id="x-axis-sort">
+              <option>Default</option>
+              <option>Most to Least</option>
+              <option>Alphabetical</option>
+            </select></span>
+          </div>
+          <div class="dragtarget" id="y-axis-target">Y-axis <span class="valbox"></span>
+            <span id="y-axis-scale">Scale: <select id="y-axis-scale">
+              <option>Linear</option>
+              <option>Logarithmic</option>
+            </select></span>
+            <span id="y-axis-sort">Sorted by: <select id="y-axis-sort">
+              <option>Default</option>
+              <option>Most to Least</option>
+              <option>Alphabetical</option>
+            </select></span>
+          </div>
           <div class="dragtarget" id="color-target">Color <span class="valbox"></span></div>
           <div class="dragtarget" id="lattice-x-target">Lattice X <span class="valbox"></span></div>
           <div class="dragtarget" id="lattice-y-target">Lattice Y <span class="valbox"></span></div>
